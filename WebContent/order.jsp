@@ -4,7 +4,7 @@
 <%@ page import="java.util.*"%>
 <%@ page import="java.io.*"%>
 <%@ page import="java.sql.*" %>
-<%@ page import="org.postgresql.*" %> 
+<%@ page import="org.postgresql.*" %>
 
 <html>
 <head>
@@ -50,12 +50,12 @@ Hello <%= name %>
 		{
 			//begin transaction
 			conn.setAutoCommit(false);
-			pstmt = conn.prepareStatement("SELECT id FROM products WHERE products.name='?'");
+			pstmt = conn.prepareStatement("SELECT id FROM products WHERE products.name=?");
 			pstmt.setString(1, placeOrder);
 			rs = pstmt.executeQuery();
 			rs.next();
 			int pid = rs.getInt("id");
-			pstmt = conn.prepareStatement("INSERT INTO inCart (id, products) VALUES (?,?)");
+			pstmt = conn.prepareStatement("INSERT INTO inCart (id, product) VALUES (?,?)");
 			pstmt.setInt(1, uid);
 			pstmt.setInt(2, pid);
 			
@@ -77,9 +77,10 @@ Hello <%= name %>
                 // Begin transaction
                 conn.setAutoCommit(false);
 
-                pstmt = conn.prepareStatement("UPDATE inCart SET quantity = ?");
-
-                pstmt.setInt(1, Integer.getInteger(request.getParameter("quantity")));
+                pstmt = conn.prepareStatement("UPDATE inCart SET quantity=? WHERE id=? AND product=?");
+                pstmt.setInt(3, Integer.parseInt(request.getParameter("product")));
+                pstmt.setInt(2, Integer.parseInt(request.getParameter("userid")));
+                pstmt.setInt(1, Integer.parseInt(request.getParameter("quantity")));
                 int rowCount = pstmt.executeUpdate();
 
                 // Commit transaction
@@ -98,9 +99,10 @@ Hello <%= name %>
 
                 // Create the prepared statement and use it to
                 pstmt = conn
-                    .prepareStatement("DELETE FROM products WHERE id = ?");
+                    .prepareStatement("DELETE FROM inCart WHERE id=? AND product=?");
 
-                pstmt.setInt(1, Integer.parseInt(request.getParameter("ID")));
+                pstmt.setInt(1, Integer.parseInt(request.getParameter("userid")));
+                pstmt.setInt(2, Integer.parseInt(request.getParameter("product")));
                 int rowCount = pstmt.executeUpdate();
 
                 // Commit transaction
@@ -136,19 +138,21 @@ Hello <%= name %>
         <tr>
             <form action="order.jsp" method="POST">
                 <input type="hidden" name="action" value="update"/>
-                <input type="hidden" name="ID" value="<%=rs.getInt("ID")%>"/>
+                <input type="hidden" name="product" value="<%=rs.getString("product")%>"/>
+                <input type="hidden" name="userid" value="<%=uid%>"/>
             <td>
                 <%=rs.getString("product")%>
             </td>
             <td>
-                <input value="<%=rs.getString("quantity")%>" name="quantity" size="15"/>
+                <input type="text" name="quantity" value="<%=rs.getString("quantity")%>" size="15"/>
             </td>
             <%-- Button --%>
-            <td><input type="submit" value="Update"></td>
+            <td><button type="submit">Update</td>
             </form>
             <form action="order.jsp" method="POST">
                 <input type="hidden" name="action" value="delete"/>
-                <input type="hidden" value="<%=rs.getInt("ID")%>" name="ID"/>
+                <input type="hidden" name="product" value="<%=rs.getString("product")%>"/>
+                <input type="hidden" name="userid" value="<%=uid%>"/>
                 <%-- Button --%>
             <td><input type="submit" value="Delete"/></td>
             </form>
