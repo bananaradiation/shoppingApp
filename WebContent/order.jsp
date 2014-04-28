@@ -132,7 +132,10 @@ Hello <%= name %>
 		
 		<%-- -------- Iteration Code -------- --%>
         <%
-            // Iterate over the ResultSet
+            conn.setAutoCommit(false);
+        	ResultSet nameSet = null;
+        	pstmt = conn.prepareStatement("SELECT name FROM products WHERE id=?");
+        	// Iterate over the ResultSet
             while (rs.next()) {
         %>
         <tr>
@@ -141,7 +144,12 @@ Hello <%= name %>
                 <input type="hidden" name="product" value="<%=rs.getString("product")%>"/>
                 <input type="hidden" name="userid" value="<%=uid%>"/>
             <td>
-                <%=rs.getString("product")%>
+            <% 
+            	pstmt.setInt(1, rs.getInt("product"));
+            	nameSet = pstmt.executeQuery();
+            	nameSet.next();
+            %>
+                <%=nameSet.getString("name")%>
             </td>
             <td>
                 <input type="text" name="quantity" value="<%=rs.getString("quantity")%>" size="15"/>
@@ -160,6 +168,8 @@ Hello <%= name %>
 
         <%
             }
+        	nameSet.close();
+        	conn.setAutoCommit(true);
         %>
         
         <%-- -------- Close Connection Code -------- --%>
