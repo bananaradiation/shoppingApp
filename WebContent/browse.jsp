@@ -12,10 +12,25 @@
 <title>Product Browsing</title>
 </head>
 <body>
-<% String name = (String)session.getAttribute("name"); %>
+<% String name = (String)session.getAttribute("name"); 
+	String searchItem = request.getParameter("search");
+	String categoryFilter = request.getParameter("category");
+	String searchBoxString;
+	if(searchItem != null)
+	{
+		searchBoxString = searchItem;
+	}
+	else
+	{ 
+		searchBoxString = "search";
+	}
+%>
 Hello <%= name %>
 <form action="browse.jsp" method="GET">
-	<input type="text" name="search" value="search">
+	<%if(categoryFilter != null && !categoryFilter.equals("All producst")){ %>
+	<input type="hidden" name="category" value=<%=categoryFilter%>>
+	<%} %>
+	<input type="text" name="search" value= <%=searchBoxString%>>
 <button type="submit">go</button>
 </form> 
 <%-- below is the section that displays a list of categories --%>
@@ -50,36 +65,58 @@ Hello <%= name %>
     
     
     //display categories
+    %><form action='browse.jsp' action='GET'>
+    <%if(searchItem != null){ %>
+    	<input type="hidden" name="search" value= <%=searchBoxString%>>
+    <%} %>
+    	<input type="submit" name="category" value='All products'>
+    <%
     for(int i = 0; i < categories.size(); i++)
     {
-    	%> <a href="<%=request.getRequestURL().toString() + "?category=" + categories.get(i)%>">
-    			<%= categories.get(i) %></a> <br> <% 
+    	%>
+    		<br><input type="submit" name="category" value=<%=categories.get(i)%>>
+		</form><%
     }
     
 %>
 
 <%-- below is the part that displays products --%>
 <%
-	//strings for searches, currently not working
-	String searchItem = request.getParameter("search");
-	String catItem = (String)session.getAttribute("catergory");
+		int catf = 0;
+		if(categoryFilter != null && !categoryFilter.equals("All products"))
+		{
+			conn.setAutoCommit(false);
+			//retrieve categories
+			pstmt = conn.prepareStatement("SELECT id FROM categories WHERE name=?;");
+			pstmt.setString(1, categoryFilter);
+			//end transaction
+			rs = pstmt.executeQuery();
+			conn.setAutoCommit(true);
+			rs.next();
+			catf = rs.getInt("id");
+		}
+		ArrayList<Integer> catid = new ArrayList<Integer>();
+		while(rs.next())
+		{
+			catid.add(rs.getInt("id"));
+		}
 	
 		//begin transaction
 		conn.setAutoCommit(false);
-		if(catItem != null && searchItem != null)
+		if(categoryFilter != null && searchItem != null && !categoryFilter.equals("All products"))
 		{
 			pstmt = conn.prepareStatement(
-				"SELECT name, sku, price, category FROM products WHERE products.category=?, products.name LIKE ?");
-			pstmt.setString(1, catItem);
+				"SELECT name, sku, price, category FROM products WHERE products.category=? AND products.name LIKE ?");
+			pstmt.setInt(1, catf);
 			pstmt.setString(2, "%"+searchItem+"%");
 		} else if (searchItem != null){
 			pstmt = conn.prepareStatement(
 				"SELECT name, sku, price, category FROM products WHERE products.name LIKE ?");
 			pstmt.setString(1, "%"+searchItem+"%");
-		} else if (catItem != null){
+		} else if (categoryFilter != null && !categoryFilter.equals("All products")){
 			pstmt = conn.prepareStatement(
 				"SELECT name, sku, price, category FROM products WHERE products.category=?");
-			pstmt.setString(1, catItem);
+			pstmt.setInt(1, catf);
 		} else {
 			pstmt = conn.prepareStatement("SELECT name, sku, price, category FROM products;");
 		}
