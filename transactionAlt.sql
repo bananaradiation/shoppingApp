@@ -1,7 +1,8 @@
 CREATE TABLE categories (
     ID          SERIAL PRIMARY KEY,
     name        TEXT NOT NULL UNIQUE,
-    description TEXT NOT NULL
+    description TEXT NOT NULL,
+    owner       INTEGER REFERENCES users (ID) NOT NULL
 );
 CREATE TABLE products (
     ID          SERIAL PRIMARY KEY,
@@ -9,7 +10,7 @@ CREATE TABLE products (
     sku         TEXT NOT NULL UNIQUE,
     price       NUMERIC NOT NULL,
         -- price > 0
-    category    INTEGER REFERENCES categories (id) NOT NULL
+    category    INTEGER REFERENCES categories (ID) NOT NULL
 );
 CREATE TABLE users (
     ID          SERIAL PRIMARY KEY,
