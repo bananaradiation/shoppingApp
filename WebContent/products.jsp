@@ -53,7 +53,7 @@
                     pstmt = conn
                     .prepareStatement("INSERT INTO products (name, sku, price, category, owner) VALUES (?, ?, ?, ?, ?)");
 
-                    pstmt.setString(1, (String)session.getAttribute("name"));
+                    pstmt.setString(1, request.getParameter("name"));
                     pstmt.setString(2, request.getParameter("sku"));
                     pstmt.setInt(3, Integer.parseInt(request.getParameter("price")));
                     pstmt.setString(4, request.getParameter("category"));
@@ -63,7 +63,16 @@
                     // Commit transaction
                     conn.commit();
                     conn.setAutoCommit(true);
-                }
+%>
+                    // set action to success
+                    <form action="confirmation.jsp" method="GET">
+                         <input type="hidden" name="action" value="success"/>
+                         <input type="hidden" name="name" value="name"/>
+                         <input type="hidden" name="sku" value="sku"/>
+                         <input type="hidden" name="price" value="price"/>
+                         <input type="hidden" name="categpru" value="category"/>
+                    </form>
+  <%              }
             %>
             
             <%-- -------- UPDATE Code -------- --%>
