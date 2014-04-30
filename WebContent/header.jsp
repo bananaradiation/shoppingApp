@@ -10,3 +10,18 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+
+<% String action = request.getParameter("action");
+
+if (action != null && action.equals("login")) { %> 
+	<title>Shopping Home</title>
+	</head> 
+	<body>
+	<%
+	String sessionName = request.getParameter("name");
+	session.setAttribute("sessionName", sessionName); %>
+	Welcome <%= session.getAttribute("sessionName")	%> <p/>
+<%
+} %>	

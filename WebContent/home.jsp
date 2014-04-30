@@ -1,14 +1,9 @@
 <%@ include file="/header.jsp" %>
 
-<title>Shopping Home</title>
-</head>
-<body>
-
 <%
-	String name = request.getParameter("name");
-	session.setAttribute("name", name);
-	String role;
-	
+	String name = request.getParameter("name");	
+	String role; 
+
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
@@ -34,7 +29,6 @@
 		
 	    rs = pstmt.executeQuery();	
 	    
-	    
 	    Boolean flag = rs.next();
 	    if (flag == false) {
 	    	%>The provided name <%= name %> not known <p/>
@@ -48,7 +42,6 @@
 	    else {	    
 	    	role = rs.getString("role");
 		%>
-		Welcome <%= name %> <p/>
 		
 	 		<%
 	 		if (role.equals("owner")) {%>
