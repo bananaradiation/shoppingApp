@@ -5,8 +5,7 @@
 
 <body>
 
-<%
-String action = request.getParameter("action");	
+<%	
 String name = request.getParameter("name");
 String age = request.getParameter("age");
 String role = request.getParameter("role");
@@ -53,6 +52,7 @@ try {
         	Please log in below <p/>
         	<form action="home.jsp" method="GET">
 				Name: <input type="text" name="name" size="20"/><p/>
+				<input type="hidden" name="action" value="login"/>
 				<button type="submit">Log In</button>
 			</form>
 			<%

@@ -24,4 +24,5 @@ if (action != null && action.equals("login")) { %>
 	session.setAttribute("sessionName", sessionName); %>
 	Welcome <%= session.getAttribute("sessionName")	%> <p/>
 <%
-} %>	
+}	
+

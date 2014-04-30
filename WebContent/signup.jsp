@@ -11,6 +11,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
 <title>Shopping App: Sign-up Page</title>
 </head>
 
@@ -43,7 +44,7 @@
     <!-- Add an HTML table header row to format the results -->
     
     <h2>Sign Up Now!</h2>
-		<form action="login.jsp" method="GET">
+		<form action="login.jsp" method="POST">
 
 		Name: <input type="text" name="name" size="20"/><p/>
 		Role: <select name="role">
