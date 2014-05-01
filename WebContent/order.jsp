@@ -168,7 +168,7 @@ Hello <%= name %>
 
         <%
             }
-        	nameSet.close();
+        	if(nameSet != null){ nameSet.close();}
         	conn.setAutoCommit(true);
         %>
         
