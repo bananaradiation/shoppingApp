@@ -24,6 +24,13 @@ buylink
 	top:0px;
 	right:0px;
 }
+
+input[type="submit"]{
+border:0;
+color:blue;
+text-decoration:underline;
+
+}
 </style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Product Browsing</title>
