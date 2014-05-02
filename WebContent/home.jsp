@@ -72,7 +72,7 @@
 	 		<%
 	 		if (role.equals("owner")) {%>
 	 				<a href="/ShoppingApplication/categories.jsp">Go to Categories</a><p/>
-	 				<a href="/ShoppingApplication/products.jsp">Go to Products</a><p/> <%
+	 				<a href="/ShoppingApplication/products.jsp?category=all">Go to Products</a><p/> <%
 // 	 				<input type="hidden" name="role" value="owner"/>
 				}
 	 		else if (role.equals("customer")) {

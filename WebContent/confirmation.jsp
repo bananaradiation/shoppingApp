@@ -70,14 +70,14 @@ try {
 	Product sku:  <%= sku%> <p/>
 	Product category:  <%= productCategoryName%> <p/>
 	Product price:  <%= price%> <p/>
-	<a href="products.jsp">Click here to go back to Products</a>	    
+	<a href="products.jsp?category=all">Click here to go back to Products</a>	    
 <%	    
 }
 catch (SQLException e) { 
 	e.printStackTrace();
 	%>
 	Failure to insert new product<p/>
-	<a href="products.jsp">Click here to go back to Products</a>
+	<a href="products.jsp?category=all">Click here to go back to Products</a>
 	<%
 }
 finally {
