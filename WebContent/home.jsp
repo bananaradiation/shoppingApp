@@ -22,7 +22,6 @@
 		String sessionName = request.getParameter("name");
 		session.setAttribute("sessionName", sessionName); 
 		%>
-		Welcome <%= session.getAttribute("sessionName")	%> <p/>
 	<%
 	}	
 	String name = request.getParameter("name");	
@@ -68,7 +67,7 @@
 	    	sessionID = rs.getString("ID");
 	    	session.setAttribute("sessionID", sessionID);
 		%>
-		
+		Welcome <%= session.getAttribute("sessionName")	%> <p/>
 	 		<%
 	 		if (role.equals("owner")) {%>
 	 				<a href="/ShoppingApplication/categories.jsp">Go to Categories</a><p/>
