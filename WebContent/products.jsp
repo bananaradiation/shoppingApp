@@ -151,33 +151,33 @@ try {
 			        <td><input type="submit" value="Insert"/></td>
 		        </form>
 			</tr>
-			
-			
-			 
 		</table>
  	</div>
 	
-
 	<%
-	if (category != null && category.equals("all")) {
-		String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
+	String searchFor = request.getParameter("query");
+	String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
+	if (action != null && action.equals("search") && category.equals("all")) {
+		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name = ? AND categories.ID=products.category");	
+		pstmt.setInt(1, ownerID);
+		pstmt.setString(2, searchFor);
+		rs = pstmt.executeQuery();
+	}
+	else if (action != null && action.equals("search")) {
+		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name = ? AND categories.ID=products.category");
+		pstmt.setInt(1, ownerID);
+		pstmt.setString(2, searchFor);
+		rs = pstmt.executeQuery();
+	}
+	else if (category != null && category.equals("all")) {
 		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.owner = ? AND products.category=categories.ID");
 		pstmt.setInt(1, ownerID);
 		rs = pstmt.executeQuery();
 		rs.next();
-	} 
+	}
 	else if (category != null) {
-		String sel = "products.ID AS pID, products.name AS productName, products.sku, products.price, categories.name AS catName";
 		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.name = ? AND products.category=categories.ID");	
 		pstmt.setString(1, category);
-		rs = pstmt.executeQuery();
-	}
-	else if (action != null && action.equals("search")) {
-		String searchFor = request.getParameter("query");
-		String sel = "products.ID AS pID, products.name AS productName, products.sku, products.price, categories.name AS catName";
-		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner= ? AND products.name = ? AND ON categories.ID=products.category");	
-		pstmt.setInt(1, ownerID);
-		pstmt.setString(2, searchFor);
 		rs = pstmt.executeQuery();
 	}
 	
@@ -189,10 +189,11 @@ try {
 		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td>
 		    	<td><input value="<%=rs.getString("catName")%>" name="productCategory" size="15"/></td>
 		    	<input type="hidden" name="action" value="update"/>
-	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/>
+<%-- 	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/> --%>
 			    <td><input type="submit" value="Update"></td>
 	   		</form>
-	   	</tr> <%
+	   	</tr>
+	<%
  	} %>
  	
     		
@@ -218,17 +219,12 @@ try {
 <%-- 			} %> --%>
  		</tr> 
 	</table> <%
-// <%
-
-	rs.close();
-// 	statement.close();
-	conn.close();
 }
 catch (SQLException e) { 
 	e.printStackTrace();
 	%>
 	Requested data modification failed. <p/>
-	<a href="products.jsp?categories=all">Click here to go back to Products</a>
+	<a href="products.jsp?category=all">Click here to go back to Products</a>
 	<%
     
 }
