@@ -29,7 +29,11 @@ buylink
 <title>Product Browsing</title>
 </head>
 <body>
-<% String name = (String)session.getAttribute("sessionName"); 
+<% String name = (String)session.getAttribute("sessionName"); %>
+<%if(name == null){
+%>Please <a href="login.jsp">log in</a> first<%	
+}else{ %>
+<% 
 	String searchItem = request.getParameter("search");
 	String categoryFilter = request.getParameter("category");
 	String searchBoxString;
@@ -50,7 +54,8 @@ Hello <%= name %>
 	<%} %>
 	<input type="text" name="search" value= <%=searchBoxString%>>
 <button type="submit">go</button>
-</form> 
+</form>
+Categories:<br>
 <%-- below is the section that displays a list of categories --%>
 <%
 	Connection conn = null;
@@ -100,6 +105,7 @@ Hello <%= name %>
 
 <%-- below is the part that displays products --%>
 <productPos>
+Products: <br>
 <%
 		int catf = 0;
 		if(categoryFilter != null && !categoryFilter.equals("All products"))
@@ -169,7 +175,7 @@ Hello <%= name %>
 
         // Close the Connection
         conn.close();
-	} catch (SQLException e){} finally{}
+	} catch (SQLException e){} finally{}}
 %>
 </body>
 </html>

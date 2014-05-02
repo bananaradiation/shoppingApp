@@ -14,6 +14,14 @@ String state = request.getParameter("state");
 Connection conn = null;
 PreparedStatement pstmt = null;
 ResultSet rs = null;
+if(name == null){%>
+Please log in below <p/>
+<form action="home.jsp" method="GET">
+	Name: <input type="text" name="name" size="20"/><p/>
+	<input type="hidden" name="action" value="login"/>
+	<button type="submit">Log In</button>
+</form><%
+}else{
 
 try {
     // Registering Postgresql JDBC driver with the DriverManager
@@ -65,7 +73,7 @@ try {
 } 
 catch (SQLException e) {
 	e.printStackTrace();
-}
+}}
 %>
 
 </body>
