@@ -16,10 +16,7 @@
 </head>
 
 <body>
-<h1>Welcome :) </h1>
-
 	<%  
-
 	ArrayList<String> roles = new ArrayList<String>();
 		roles.add("Owner");
 		roles.add("Customer");
@@ -40,9 +37,6 @@
 	}
     %>
     
-    
-    <!-- Add an HTML table header row to format the results -->
-    
     <h2>Sign Up Now!</h2>
 		<form action="login.jsp" method="POST">
 
@@ -59,6 +53,5 @@
 			  </select><p/>
 		<button type="submit">Sign Up</button>
 		</form>
-
 </body>
 </html>
