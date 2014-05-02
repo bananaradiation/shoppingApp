@@ -11,9 +11,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-
-
 	<% String action = request.getParameter("action");
+	String sessionID;
 	
 	if (action != null && action.equals("login")) { %> 
 		<title>Shopping Home</title>
@@ -21,7 +20,8 @@
 		<body>
 		<%
 		String sessionName = request.getParameter("name");
-		session.setAttribute("sessionName", sessionName); %>
+		session.setAttribute("sessionName", sessionName); 
+		%>
 		Welcome <%= session.getAttribute("sessionName")	%> <p/>
 	<%
 	}	
@@ -65,6 +65,8 @@
 	    }
 	    else {	    
 	    	role = rs.getString("role");
+	    	sessionID = rs.getString("ID");
+	    	session.setAttribute("sessionID", sessionID);
 		%>
 		
 	 		<%
