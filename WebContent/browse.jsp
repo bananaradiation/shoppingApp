@@ -216,7 +216,37 @@ Products: <br>
 
         // Close the Connection
         conn.close();
-	} catch (SQLException e){} finally{}}
+	} catch (SQLException e){
+		// Wrap the SQL exception in a runtime exception to propagate
+        // it upwards
+        throw new RuntimeException(e);
+	} catch (NumberFormatException ne){
+		%>please put in an integer value for quantity. <br>
+			Select a category to view products.<%
+		
+	} finally{
+		// Release resources in a finally block in reverse-order of
+        // their creation
+
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) { } // Ignore
+            rs = null;
+        }
+        if (pstmt != null) {
+            try {
+                pstmt.close();
+            } catch (SQLException e) { } // Ignore
+            pstmt = null;
+        }
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) { } // Ignore
+            conn = null;
+        }
+	}}
 %>
 </body>
 </html>
