@@ -48,20 +48,12 @@ Hello <%= name %>
 	int uid = rs.getInt("id");
 	conn.setAutoCommit(true);
 	
-	if(action != null && action.equals("buy"))
-	{
-		conn.setAutoCommit(false);
-		pstmt = conn.prepareStatement("DELETE FROM inCart WHERE id=?");
-		pstmt.setInt(1, uid);
-		pstmt.executeUpdate();
-		
-		//assuming this was a real page, CreditCard transaction stuff would likely go here
-        // Commit transaction
-        conn.commit();
-        conn.setAutoCommit(true);
-	}
 	
 	double totalPrice = 0;
+	if(action != null && action.equals("buy"))
+	{
+		%>, you have successfully purchased <%
+	}
 %>
 <table border="1">
         <tr>
@@ -122,16 +114,38 @@ Hello <%= name %>
         	if(nameSet != null){ nameSet.close();}
         	if(prices != null){ prices.close();}
         	conn.setAutoCommit(true);
+        	if(action != null && action.equals("buy")){
+        		%> for $<%=totalPrice%>:
+        		<p align="right"><a href="/ShoppingApplication/browse.jsp">Return to Product Browsing</a></p><%
+        	}
+        	else {
         %>
         </table>
-        Total cost is $<%=totalPrice%><br>
+        Total cost is $<%=totalPrice%>:<br>
         Credit Card Number: <br>
 		<form action="buyCart.jsp" method=POST>
 			<input type="hidden" name="action" value="buy"/>
 			<input type="text" name="ccNum" size="15"/>
 			<button type="submit">Purchase</button>
 		</form>
-        
+		<% 
+        	}
+        	
+		if(action != null && action.equals("buy"))
+		{
+			conn.setAutoCommit(false);
+			pstmt = conn.prepareStatement("UPDATE users SET creditCard=? WHERE id=?");
+			pstmt.setString(1, (String)request.getAttribute("ccNum"));
+			pstmt.setInt(2, uid);
+			pstmt.executeUpdate();
+			pstmt = conn.prepareStatement("DELETE FROM inCart WHERE id=?");
+			pstmt.setInt(1, uid);
+			pstmt.executeUpdate();
+	        // Commit transaction
+	        conn.commit();
+	        conn.setAutoCommit(true);
+			}
+        %>
         <%-- -------- Close Connection Code -------- --%>
         <%
             // Close the ResultSet
@@ -141,7 +155,7 @@ Hello <%= name %>
             conn.close();
             
     
-    
+
     	}catch(SQLException e){
     		// Wrap the SQL exception in a runtime exception to propagate
             // it upwards
