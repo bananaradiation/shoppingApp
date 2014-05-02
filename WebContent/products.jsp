@@ -17,7 +17,6 @@
 <body>
 
 <%
-
 String name = (String)session.getAttribute("sessionName");
 String action = request.getParameter("action");
 String category = request.getParameter("category");
@@ -38,8 +37,23 @@ try {
         "user=postgres&password=postgres");
     
 	int ownerID = Integer.parseInt((String)session.getAttribute("sessionID"));
-		
+				
+		// Start Transaction
+// 		conn.setAutoCommit(false);
+	    
+// 	    pstmt = conn.prepareStatement("UPDATE categories SET name = ?, description = ?  WHERE ID = ?");
+// 	    pstmt.setString(1, categoryName);
+// 	    pstmt.setString(2, description);
+// 	    pstmt.setInt(3, categoryID);
+// 	    int rowCount = pstmt.executeUpdate();
 
+// 	    if (rowCount > 0) {
+// 		    conn.commit();
+// 		    conn.setAutoCommit(true);
+// 		    // End Transaction
+// 	    }
+		
+// 	}
 // 	if (action != null && action.equals("update")) {
 // 		String categoryName = request.getParameter("categoryName");
 // 		String description = request.getParameter("description");
@@ -107,6 +121,7 @@ try {
 			<form action="products.jsp" method="GET">
 				<input type="text" value="" name="query" size="15"/> 
 				<input type="hidden" name="action" value="search"/>
+				<input type="hidden" name="category" value="<%= category%>"/>
 				<center><input type="submit" value="Search Products"/></center>
 			</form>
 		</div>
@@ -127,7 +142,7 @@ try {
 					<td><input type="text" value="" name="productName" size="15"/></td>
 			        <td><input type="text" value="" name="sku" size="15"/></td>
 			     
-			        <td><select name="productCategory">
+			        <td><select name="productCategory" width="15">
 					<% for (int i = 0; i < categoryDrop.size(); i++) { %>
 							<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
 					<% } %>
@@ -143,36 +158,42 @@ try {
  	</div>
 	
 
-<%-- 	<% --%>
-// 	if (category != null && category.equals("")) {
-// 		pstmt = conn.prepareStatement("SELECT * FROM products JOIN categories ON products.categories=categories.ID WHERE categories.owner = ?");
-// 		pstmt.setInt(1, ownerID);
-// 		rs = pstmt.executeQuery();
-		
-// 	} 
-// 	else if (category != null) {
-// 		pstmt = conn.prepareStatement("SELECT * FROM products WHERE category = ?");	
-// 		pstmt.setString(1, category);
-// 		rs = pstmt.executeQuery();
-// 	}
+	<%
+	if (category != null && category.equals("all")) {
+		String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
+		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.owner = ? AND products.category=categories.ID");
+		pstmt.setInt(1, ownerID);
+		rs = pstmt.executeQuery();
+		rs.next();
+	} 
+	else if (category != null) {
+		String sel = "products.ID AS pID, products.name AS productName, products.sku, products.price, categories.name AS catName";
+		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.name = ? AND products.category=categories.ID");	
+		pstmt.setString(1, category);
+		rs = pstmt.executeQuery();
+	}
+	else if (action != null && action.equals("search")) {
+		String searchFor = request.getParameter("query");
+		String sel = "products.ID AS pID, products.name AS productName, products.sku, products.price, categories.name AS catName";
+		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner= ? AND products.name = ? AND ON categories.ID=products.category");	
+		pstmt.setInt(1, ownerID);
+		pstmt.setString(2, searchFor);
+		rs = pstmt.executeQuery();
+	}
 	
-<%-- 	while (rs.next()) {	%> --%>
-		
-		
-<!-- 		<tr> -->
-<!-- 			<form action="categories.jsp" method="POST"> 		 -->
-<%-- 		   		<td><input value="<%=rs.getString("name")%>" name="productName" size="15"/></td> --%>
-<%-- 		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="15"/></td> --%>
-<%-- 		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td> --%>
-<%-- 		    	<td><input value="<%=rs.getString("category")%>" name="productCategory" size="15"/></td> --%>
-<!-- 		    	<input type="hidden" name="action" value="update"/> -->
-<%-- 	        	<input type="hidden" name="productID" value="<%= rs.getInt("ID")%>"/> --%>
-<!-- 			    <td><input type="submit" value="Update"></td> -->
-<!-- 	   		</form> -->
-<%-- 	   	</tr> <% --%>
-
-
-<!-- 	} %> -->
+ 	while (rs.next()) {	%>
+		<tr>
+			<form action="categories.jsp" method="POST">
+		   		<td><input value="<%=rs.getString("productName")%>" name="productName" size="15"/></td>
+		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="15"/></td>
+		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td>
+		    	<td><input value="<%=rs.getString("catName")%>" name="productCategory" size="15"/></td>
+		    	<input type="hidden" name="action" value="update"/>
+	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/>
+			    <td><input type="submit" value="Update"></td>
+	   		</form>
+	   	</tr> <%
+ 	} %>
  	
     		
 	
@@ -207,7 +228,7 @@ catch (SQLException e) {
 	e.printStackTrace();
 	%>
 	Requested data modification failed. <p/>
-	<a href="products.jsp">Click here to go back to Products</a>
+	<a href="products.jsp?categories=all">Click here to go back to Products</a>
 	<%
     
 }
