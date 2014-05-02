@@ -112,60 +112,55 @@ try {
 			</form>
 		</div>
 	</div>
-	
-	<div class="content">
-		<table>
-			<tr>		
-				<th>Name</th>
-			    <th>SKU</th>
-			    <th>Category</th>
-			    <th>Price</th>
-			</tr>
-			<tr>
-				<form action="userConfirmation.jsp" method="POST">
-			        <input type="hidden" name="action" value="insert"/>
-					<td><input type="text" value="" name="productName" size="10"/></td>
-			        <td><input type="text" value="" name="sku" size="10"/></td>
-			        <td><select name="productCategory" width="10">
-					<% for (int i = 0; i < categoryDrop.size(); i++) { %>
-							<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
-					<% } %>
-				  		</select></td>
-			        <td><input type="text" value="" name="price" size="10"/></td>
-			        <td><input type="submit" value="Insert"/></td>
-		        </form>
-			</tr>
-		</table>
- 	</div>
-	
 
 	<%
 	String searchFor = request.getParameter("query");
 	String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
+	
 	if (action != null && action.equals("search") && category.equals("all")) {
-		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name = ? AND categories.ID=products.category");	
+		pstmt = conn.prepareStatement("SELECT "+ sel+ " FROM (categories JOIN products ON categories.ID=products.category WHERE categories.owner = ?) WHERE products.name = ?");	
 		pstmt.setInt(1, ownerID);
-		pstmt.setString(2, searchFor);
+		pstmt.setString(2, "%"+searchFor+"%");
 		rs = pstmt.executeQuery();
 	}
 	else if (action != null && action.equals("search")) {
 		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name = ? AND categories.ID=products.category");
 		pstmt.setInt(1, ownerID);
-		pstmt.setString(2, searchFor);
+		pstmt.setString(2, "%"+searchFor+"%");
 		rs = pstmt.executeQuery();
 	}
 	else if (category != null && category.equals("all")) {
-		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.owner = ? AND products.category=categories.ID");
+		pstmt = conn.prepareStatement("SELECT "+sel+" FROM categories JOIN products ON categories.ID=products.category WHERE categories.owner = ?");
 		pstmt.setInt(1, ownerID);
 		rs = pstmt.executeQuery();
-		rs.next();
 	}
 	else if (category != null) {
-		pstmt = conn.prepareStatement("SELECT "+sel+" FROM products,categories WHERE categories.name = ? AND products.category=categories.ID");	
+		pstmt = conn.prepareStatement("SELECT "+sel+" FROM categories JOIN products ON products.category=categories.ID WHERE categories.name = ?");	
 		pstmt.setString(1, category);
 		rs = pstmt.executeQuery();
-	}
-	
+	} %>
+	<div class="content">
+	<table>
+		<tr>		
+			<th>Name</th>
+		    <th>SKU</th>
+		    <th>Category</th>
+		    <th>Price</th>
+		</tr>
+		<tr>
+			<form action="userConfirmation.jsp" method="POST">
+		        <input type="hidden" name="action" value="insert"/>
+				<td><input type="text" value="" name="productName" size="10"/></td>
+		        <td><input type="text" value="" name="sku" size="10"/></td>
+		        <td><select name="productCategory" width="10">
+				<% for (int i = 0; i < categoryDrop.size(); i++) { %>
+						<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
+				<% } %>
+			  		</select></td>
+		        <td><input type="text" value="" name="price" size="10"/></td>
+		        <td><input type="submit" value="Insert"/></td>
+	        </form>
+		</tr> <%	
  	while (rs.next()) {	%>
 		<tr>
 			<form action="products.jsp?category=all" method="POST">
@@ -190,16 +185,11 @@ try {
 		 	        <input type="hidden" name="action" value="delete"/>
 		 	        <input type="hidden" name="productID" value="<%= rs.getInt("pID") %>"/>
 			    	<td><input type="submit" value="Delete"/></td>
-	   	</tr>
-	<%
- 	} %>
- 	
-    		
-
-         		
-    			</form>
- 		</tr> 
-	</table> <%
+			</form>
+ 		</tr> <%
+ 		} %>
+	</table> 
+	</div><%
 }
 catch (SQLException e) { 
 	e.printStackTrace();
