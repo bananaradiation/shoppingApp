@@ -105,7 +105,7 @@ try {
 	Hello <%= name %>
 
 	<!-- Add an HTML table header row to format the results -->
-	<table>
+	<table width="90%">
 		<tr>
 			<th>Category Name</th>
 		    <th>Description</th>
