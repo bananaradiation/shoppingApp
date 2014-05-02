@@ -47,6 +47,7 @@ text-decoration:underline;
 	if(searchItem != null)
 	{
 		searchBoxString = searchItem;
+		if(searchItem.equals("")){ searchItem = null;}
 	}
 	else
 	{ 
@@ -56,7 +57,7 @@ text-decoration:underline;
 Hello <%= name %>
 <buylink><a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a></buylink>
 <form action="browse.jsp" method="GET">
-	<%if(categoryFilter != null && !categoryFilter.equals("All producst")){ %>
+	<%if(categoryFilter != null && !categoryFilter.equals("All products")){ %>
 	<input type="hidden" name="category" value=<%=categoryFilter%>>
 	<%} %>
 	<input type="text" name="search" value= <%=searchBoxString%>>
@@ -99,7 +100,7 @@ Categories:<br>
     <%if(searchItem != null){ %>
     	<input type="hidden" name="search" value= <%=searchBoxString%>>
     <%} %>
-    	<input type="submit" name="category" value='All products'>
+    	<input type="submit" name="category" value="All products">
     <%
     for(int i = 0; i < categories.size(); i++)
     {
