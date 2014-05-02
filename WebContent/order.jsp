@@ -65,14 +65,30 @@ Hello <%= name %>
 			pstmt.setString(1, placeOrder);
 			rs = pstmt.executeQuery();
 			rs.next();
-			int pid = rs.getInt("id");
-			pstmt = conn.prepareStatement("INSERT INTO inCart (id, product) VALUES (?,?)");
-			pstmt.setInt(1, uid);
-			pstmt.setInt(2, pid);
+			%> 
+			<table border="1">
+        	<tr>
+            	<th>name</th>
+           		<th>quantity</th>
+        	</tr>
+        	<tr>
+        		<form action="browse.jsp" method=POST>
+        			<input type="hidden" name="addItem" value="<%=placeOrder%>">
+        			<td><%=placeOrder%></td>
+        			<td><input type="text" name="quantity"></tr>
+        			<td><input type="submit" value="Add to Cart"></table>
+        		</form>
+        	</tr>
+        	</table>
+			<%
+			//int pid = rs.getInt("id");
+			//pstmt = conn.prepareStatement("INSERT INTO inCart (id, product) VALUES (?,?)");
+			//pstmt.setInt(1, uid);
+			//pstmt.setInt(2, pid);
 			
 			//end transaction
-			pstmt.executeUpdate();
-			conn.commit();
+			//pstmt.executeUpdate();
+			//conn.commit();
 			conn.setAutoCommit(true);
 		}
 	
@@ -124,6 +140,7 @@ Hello <%= name %>
             
         <!-- Add an HTML table header row to format the results -->
         <table border="1">
+        <tr><th>Shopping Cart Contents</th></tr>
         <tr>
             <th>name</th>
             <th>quantity</th>

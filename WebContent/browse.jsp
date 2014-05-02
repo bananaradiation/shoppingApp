@@ -103,6 +103,39 @@ Categories:<br>
     
 %>
 
+<%--code to add items to cart when returning to browsing --%>
+<%
+String placeOrder = request.getParameter("addItem");
+String quantity = request.getParameter("quantity");
+//get the users's primary key ID
+conn.setAutoCommit(false);
+pstmt = conn.prepareStatement("SELECT id FROM users WHERE users.name=?");
+pstmt.setString(1, name);
+rs = pstmt.executeQuery();
+rs.next();
+int uid = rs.getInt("id");
+conn.setAutoCommit(true);
+
+if(placeOrder != null)
+{
+	//begin transaction
+	conn.setAutoCommit(false);
+	pstmt = conn.prepareStatement("SELECT id FROM products WHERE products.name=?");
+	pstmt.setString(1, placeOrder);
+	rs = pstmt.executeQuery();
+	rs.next();
+	int pid = rs.getInt("id");
+	pstmt = conn.prepareStatement("INSERT INTO inCart (id, product, quantity) VALUES (?,?,?)");
+	pstmt.setInt(1, uid);
+	pstmt.setInt(2, pid);
+	pstmt.setInt(3, Integer.parseInt(quantity));
+	//end transaction
+	pstmt.executeUpdate();
+	conn.commit();
+	conn.setAutoCommit(true);
+}
+
+%>
 <%-- below is the part that displays products --%>
 <productPos>
 Products: <br>
