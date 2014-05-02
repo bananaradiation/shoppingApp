@@ -62,23 +62,22 @@ try {
 		    // End Transaction
 	    }
 	}
-
-// 	if (action != null && action.equals("delete")) {
-// 		int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-//         // Start transaction
-//         conn.setAutoCommit(false);
-
-//         pstmt = conn.prepareStatement("DELETE FROM categories WHERE ID = ?");
-//         pstmt.setInt(1, categoryID);
-//         int rowCount = pstmt.executeUpdate();
-
-//         if (rowCount > 0) {
-// 	        conn.commit();
-// 	        conn.setAutoCommit(true);
-// 			// End transaction
-//         }
-// 	}
+	if (action != null && action.equals("delete")) {
+		int productID = Integer.parseInt(request.getParameter("productID"));
+	    // Start transaction
+	    conn.setAutoCommit(false);
 	
+	    pstmt = conn.prepareStatement("DELETE FROM products WHERE ID = ?");
+	    pstmt.setInt(1, productID);
+	    int rowCount = pstmt.executeUpdate();
+	
+	    if (rowCount > 0) {
+		        conn.commit();
+		        conn.setAutoCommit(true);
+				// End transaction
+	    }
+	}
+
 	// populate sidebar with valid categories
 	
 	pstmt = conn.prepareStatement("SELECT name FROM categories WHERE owner = ?");
@@ -92,8 +91,7 @@ try {
 	
 	Hello <%= name %> <p/>
 	
-	<div style="width:200px;float:left;display:inline-block;">
-		
+	<div style="width:150px;float:left;display:inline-block;">
 		<div class="filter">
 			<center>
 			<a href="products.jsp?category=all">All Products</a></p>
@@ -107,7 +105,7 @@ try {
 		</div>
 		<div class="search">
 			<form action="products.jsp" method="GET">
-				<input type="text" value="" name="query" size="15"/> 
+				<input type="text" value="" name="query" size="10"/> 
 				<input type="hidden" name="action" value="search"/>
 				<input type="hidden" name="category" value="<%= category%>"/>
 				<center><input type="submit" value="Search Products"/></center>
@@ -116,25 +114,24 @@ try {
 	</div>
 	
 	<div class="content">
-		<table width="80%">
+		<table>
 			<tr>		
 				<th>Name</th>
 			    <th>SKU</th>
 			    <th>Category</th>
 			    <th>Price</th>
 			</tr>
-			<!--first line of table for inserting new categories -->
 			<tr>
-				<form action="confirmation.jsp" method="POST">
-<!-- 			        <input type="hidden" name="action" value="insert"/> -->
-					<td><input type="text" value="" name="productName" size="15"/></td>
-			        <td><input type="text" value="" name="sku" size="15"/></td>
-			        <td><select name="productCategory" width="15">
+				<form action="userConfirmation.jsp" method="POST">
+			        <input type="hidden" name="action" value="insert"/>
+					<td><input type="text" value="" name="productName" size="10"/></td>
+			        <td><input type="text" value="" name="sku" size="10"/></td>
+			        <td><select name="productCategory" width="10">
 					<% for (int i = 0; i < categoryDrop.size(); i++) { %>
 							<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
 					<% } %>
 				  		</select></td>
-			        <td><input type="text" value="" name="price" size="15"/></td>
+			        <td><input type="text" value="" name="price" size="10"/></td>
 			        <td><input type="submit" value="Insert"/></td>
 		        </form>
 			</tr>
@@ -172,39 +169,35 @@ try {
  	while (rs.next()) {	%>
 		<tr>
 			<form action="products.jsp?category=all" method="POST">
-		   		<td><input value="<%=rs.getString("productName")%>" name="productName" size="15"/></td>
-		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="15"/></td>
-		    	<td><input value="<%=rs.getString("catName")%>" name="productCategory" size="15"/></td>
-		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td>
+		   		<td><input value="<%=rs.getString("productName")%>" name="productName" size="10"/></td>
+		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="10"/></td>
+		    	<td><select name="productCategory" width="10">
+		    			<option value="<%=rs.getString("catName")%>"><%=rs.getString("catName")%></option>
+						<% 
+						for (int i = 0; i < categoryDrop.size(); i++) { 
+							if (!categoryDrop.get(i).equals(rs.getString("catName"))) { %>
+							<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
+							<%
+							} 
+						} %>
+				  		</select></td>
+		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="10"/></td>
 		    	<input type="hidden" name="action" value="update"/>
 	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/>
 			    <td><input type="submit" value="Update"></td>
 	   		</form>
+	   		<form action="products.jsp?category=all" method="POST">
+		 	        <input type="hidden" name="action" value="delete"/>
+		 	        <input type="hidden" name="productID" value="<%= rs.getInt("pID") %>"/>
+			    	<td><input type="submit" value="Delete"/></td>
 	   	</tr>
 	<%
  	} %>
  	
     		
-	
-<!-- 	// Iteration Code -->
-<!-- 	while (rs.next()) { -->
-<!-- 		// check if category name has products associated with it -->
-<!--     	Boolean deleteOK = false; -->
-<!-- 		pstmt = conn.prepareStatement("SELECT ID FROM products WHERE products.category = ?"); -->
-<!--   		pstmt.setInt(1, rs.getInt("ID")); -->
-<!--   		ResultSet rs2 = pstmt.executeQuery(); -->
-<!--   		if (!rs2.next()) { -->
-<!--   			deleteOK = true; -->
-<!--   		} -->
-		 
-<%--     		<% --%>
-<%--      		if (deleteOK) { %> --%>
-<!--          		<form action="categories.jsp" method="POST"> -->
-<!-- 		 	        <input type="hidden" name="action" value="delete"/> -->
-<%-- 		 	        <input type="hidden" name="categoryID" value="<%= rs.getInt("ID") %>"/> --%>
-<!-- 			    	<td><input type="submit" value="Delete"/></td> -->
-<%--     			</form> <% --%>
-<%-- 			} %> --%>
+
+         		
+    			</form>
  		</tr> 
 	</table> <%
 }
