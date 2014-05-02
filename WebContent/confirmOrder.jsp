@@ -10,6 +10,21 @@
 <%@ page import="java.text.DecimalFormat" %>
 <html>
 <head>
+<%!
+private static boolean isNumeric(String num)
+{
+	try
+	{
+		Double.parseDouble(num);
+		return true;
+	}
+	catch(NumberFormatException e)
+	{
+		return false;
+	}
+	
+}
+%>
 <style>
 returnlink
 {
@@ -55,7 +70,9 @@ Hello <%=name%>
 	rs.next();
 	int uid = rs.getInt("id");
 	conn.setAutoCommit(true);
-	
+	String cc = (String)request.getParameter("ccNum");
+	if(cc.length() == 16 && isNumeric(cc))
+	{
 	
 	double totalPrice = 0;
 	if(action != null && action.equals("buy"))
@@ -135,7 +152,7 @@ Hello <%=name%>
 		{
 			conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement("UPDATE users SET creditCard=? WHERE id=?");
-			pstmt.setString(1, (String)request.getAttribute("ccNum"));
+			pstmt.setString(1, (String)request.getParameter("ccNum"));
 			pstmt.setInt(2, uid);
 			pstmt.executeUpdate();
 			pstmt = conn.prepareStatement("DELETE FROM inCart WHERE id=?");
@@ -145,6 +162,10 @@ Hello <%=name%>
 	        conn.commit();
 	        conn.setAutoCommit(true);
 			}
+		}else
+		{
+			%>, your credit card does not appear to be valid<%
+		}
         %>
         <%-- -------- Close Connection Code -------- --%>
         <%
@@ -183,7 +204,6 @@ Hello <%=name%>
                 conn = null;
             }
     	} %>
-            
-
+    	
 </body>
 </html>
