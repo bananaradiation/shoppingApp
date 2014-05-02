@@ -28,7 +28,7 @@ try {
 	String sku = request.getParameter("sku");
 	String productCategoryName = request.getParameter("productCategory");
 	String priceString = request.getParameter("price");
-		int price = Integer.parseInt(priceString) > 0 ? -100 : Integer.parseInt(priceString);  
+	float price = Float.parseFloat(priceString) > 0 ? Float.parseFloat(priceString) : -100;  
 
 	// Registering Postgresql JDBC driver with the DriverManager
     Class.forName("org.postgresql.Driver");
@@ -53,9 +53,8 @@ try {
 	    pstmt.setString(1, productName);
 	    pstmt.setString(2, sku);
 	    pstmt.setInt(3, productCategory);
-	    pstmt.setInt(4, price);
+	    pstmt.setFloat(4, price);
 	    int rowCount = pstmt.executeUpdate();
-	    System.out.println("LSDFKJSLDKFJS");
 	    
 	    if (rowCount > 0) { 
 		    conn.commit();
@@ -80,6 +79,13 @@ catch (SQLException e) {
 	<%
 	e.printStackTrace();
 	
+}
+catch (NumberFormatException nfe) {
+	%>
+	Failure to insert new product<p/>
+	<a href="products.jsp?category=all">Click here to go back to Products</a>
+	<%
+	nfe.printStackTrace();
 }
 finally {
     if (rs != null) {
