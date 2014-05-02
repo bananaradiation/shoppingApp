@@ -231,6 +231,8 @@ Hello <%= name %>
     		// Wrap the SQL exception in a runtime exception to propagate
             // it upwards
             throw new RuntimeException(e);
+    	}catch(NumberFormatException ex){
+    		%>, quantity must be an integer value<%
     	}finally{
     		// Release resources in a finally block in reverse-order of
             // their creation
