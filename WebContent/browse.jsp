@@ -15,7 +15,14 @@ productPos
 {
 	position:absolute;
 	left:150px;
-	top:60px;
+	top:55px;
+}
+
+buylink
+{
+	position:absolute;
+	top:0px;
+	right:0px;
 }
 </style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -36,7 +43,7 @@ productPos
 	}
 %>
 Hello <%= name %>
-<a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a>
+<buylink><a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a></buylink>
 <form action="browse.jsp" method="GET">
 	<%if(categoryFilter != null && !categoryFilter.equals("All producst")){ %>
 	<input type="hidden" name="category" value=<%=categoryFilter%>>
