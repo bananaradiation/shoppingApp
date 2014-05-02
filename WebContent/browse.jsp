@@ -28,6 +28,7 @@
 	}
 %>
 Hello <%= name %>
+<a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a>
 <form action="browse.jsp" method="GET">
 	<%if(categoryFilter != null && !categoryFilter.equals("All producst")){ %>
 	<input type="hidden" name="category" value=<%=categoryFilter%>>
@@ -127,7 +128,7 @@ Hello <%= name %>
 		conn.setAutoCommit(true);
 		
 		//form currently used to be able to select items for order
-		%> <form action=order.jsp method="POST"> <%
+		%> <form action=order.jsp method=POST> <%
 		ResultSet catRef = null;//used to get names of categories
 		//display items
 		conn.setAutoCommit(false); //setup transactions for getting categories

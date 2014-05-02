@@ -79,6 +79,7 @@
 	 		%> 
 	 				<a href="/ShoppingApplication/browse.jsp">Go to Product Browsing</a><p/>
 	 				<a href="/ShoppingApplication/order.jsp">Go to Order Page</a> <p/>
+	 				<a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a> <p/>
 <!-- 	 				<input type="hidden" name="role" value="customer"/>  -->
 	 				<%
 	 			} 
