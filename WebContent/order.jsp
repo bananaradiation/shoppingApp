@@ -16,6 +16,7 @@
 <body>
 <% String name = (String)session.getAttribute("sessionName"); %>
 Hello <%= name %>
+<a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a>
 
 <%-- set up connection --%>
 <%
@@ -141,7 +142,7 @@ Hello <%= name %>
             while (rs.next()) {
         %>
         <tr>
-            <form action="order.jsp" method="POST">
+            <form action="order.jsp" method=POST>
                 <input type="hidden" name="action" value="update"/>
                 <input type="hidden" name="product" value="<%=rs.getString("product")%>"/>
                 <input type="hidden" name="userid" value="<%=uid%>"/>
@@ -159,7 +160,7 @@ Hello <%= name %>
             <%-- Button --%>
             <td><button type="submit">Update</td>
             </form>
-            <form action="order.jsp" method="POST">
+            <form action="order.jsp" method=POST>
                 <input type="hidden" name="action" value="delete"/>
                 <input type="hidden" name="product" value="<%=rs.getString("product")%>"/>
                 <input type="hidden" name="userid" value="<%=uid%>"/>
