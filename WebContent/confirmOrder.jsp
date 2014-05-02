@@ -84,7 +84,8 @@ Hello <%=name%>
         <tr>
             <th>name</th>
             <th>quantity</th>
-            <th>price</th>
+            <th>unit price</th>
+            <th>product subtotal</th>
         </tr>
 	<%-- -------- SELECT Statement Code -------- --%>
     <%
@@ -129,6 +130,9 @@ Hello <%=name%>
             	totalPrice = totalPrice + Integer.parseInt(rs.getString("quantity"))
                     	* Double.parseDouble(prices.getString("price"));
             %>
+            	<%= df.format(Double.parseDouble(prices.getString("price"))) %>
+            </td>
+            <td>
                 <%=df.format(Integer.parseInt(rs.getString("quantity"))
                 	* Double.parseDouble(prices.getString("price")))%>
             </td>
