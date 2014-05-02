@@ -100,7 +100,10 @@ try {
 	
 	// populate table with database categories
 	Statement statement = conn.createStatement();
-	rs = statement.executeQuery("SELECT name, description, ID FROM categories"); %>
+	pstmt = conn.prepareStatement("SELECT name, description, ID FROM categories WHERE categories.owner = ?");
+	pstmt.setInt(1, ownerID);
+	rs = pstmt.executeQuery();
+	%>
 	
 	Hello <%= name %> <p/>
 	<a href="products.jsp?category=all">Click to go to Products</a></p>
@@ -123,8 +126,8 @@ try {
 	while (rs.next()) {
 		// check if category name has products associated with it
     	Boolean deleteOK = false;
-		pstmt = conn.prepareStatement("SELECT ID FROM products WHERE products.category = ?");
-  		pstmt.setInt(1, rs.getInt("ID"));
+		pstmt = conn.prepareStatement("SELECT products.ID FROM products JOIN categories ON products.category=categories.ID WHERE categories.owner = ?");
+  		pstmt.setInt(1, ownerID);
   		ResultSet rs2 = pstmt.executeQuery();
   		if (!rs2.next()) {
   			deleteOK = true;
@@ -159,7 +162,7 @@ try {
 catch (SQLException e) {
 	%>
 	Requested data modification failed. <p/>
-	<a href="/categories.jsp">Click here to go back to Categories</a>
+	<a href="categories.jsp">Click here to go back to Categories</a>
     <% 
     e.printStackTrace();
 }
