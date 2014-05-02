@@ -10,6 +10,14 @@
 
 <html>
 <head>
+<style>
+productPos
+{
+	position:absolute;
+	left:150px;
+	top:60px;
+}
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Product Browsing</title>
 </head>
@@ -84,6 +92,7 @@ Hello <%= name %>
 %>
 
 <%-- below is the part that displays products --%>
+<productPos>
 <%
 		int catf = 0;
 		if(categoryFilter != null && !categoryFilter.equals("All products"))
@@ -139,10 +148,12 @@ Hello <%= name %>
 			catRef = pstmt.executeQuery();
 			catRef.next();
 			%> <input name="placeOrder" type="submit" value="<%=rs.getString("name")%>"> 
-				<%=rs.getString("sku") %> $<%=rs.getString("price") %> <%=catRef.getString("name") %> <%
+				sku:<%=rs.getString("sku") %> price:$<%=rs.getString("price") %> category:<%=catRef.getString("name") %><br> <%
 		}
 		conn.setAutoCommit(true);//transactions completed after loop
-		%> </form><%
+		%> </form>
+		</productPos>
+		<%
 		// Close the ResultSet
         rs.close();
 
