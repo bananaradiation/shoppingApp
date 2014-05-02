@@ -10,6 +10,14 @@
 <%@ page import="java.text.DecimalFormat" %>
 <html>
 <head>
+<style>
+returnlink
+{
+	position:absolute;
+	top:0px;
+	right:0px;
+}
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Buy Cart</title>
 </head>
@@ -116,7 +124,7 @@ Hello <%= name %>
         	conn.setAutoCommit(true);
         	if(action != null && action.equals("buy")){
         		%> for $<%=totalPrice%>:
-        		<p align="right"><a href="/ShoppingApplication/browse.jsp">Return to Product Browsing</a></p><%
+        		<returnlink><a href="/ShoppingApplication/browse.jsp">Return to Product Browsing</a></returnlink><%
         	}
         	else {
         %>

@@ -10,13 +10,21 @@
 
 <html>
 <head>
+<style>
+buylink
+{
+	position:absolute;
+	top:0px;
+	right:0px;
+}
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Product Order</title>
 </head>
 <body>
 <% String name = (String)session.getAttribute("sessionName"); %>
 Hello <%= name %>
-<a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a>
+<buylink><a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a></buylink>
 
 <%-- set up connection --%>
 <%
