@@ -41,18 +41,25 @@ try {
 	if (action != null && action.equals("update")) {
 		String productName = request.getParameter("productName");
 		String sku = request.getParameter("sku");
-		String productCategory = request.getParameter("productCategory");
-		java.math.BigDecimal price = new java.math.BigDecimal(request.getParameter("price"));
+		String categoryName = request.getParameter("categoryName");
+		String priceString = request.getParameter("price");
+		float price = Float.parseFloat(priceString) > 0 ? Float.parseFloat(priceString) : -100;
 		int productID = Integer.parseInt(request.getParameter("productID"));
 
 		// Start Transaction
 		conn.setAutoCommit(false);
 	    
-	    pstmt = conn.prepareStatement("UPDATE products SET name = ?, sku = ?, category = ?, price = ? WHERE ID = ?");
+		pstmt = conn.prepareStatement("SELECT products.category AS catID FROM products JOIN categories ON products.category=categories.ID WHERE categories.name = ?");
+		pstmt.setString(1, categoryName);
+		rs = pstmt.executeQuery();
+		rs.next();
+		int productCategoryID = rs.getInt("catID");
+	
+		pstmt = conn.prepareStatement("UPDATE products SET name = ?, sku = ?, category = ?, price = ? WHERE ID = ?");
 	    pstmt.setString(1, productName);
 	    pstmt.setString(2, sku);
-	    pstmt.setInt(3, productID);
-	    pstmt.setBigDecimal(4, price);
+	    pstmt.setInt(3, productCategoryID);
+	    pstmt.setFloat(4, price);
 	    pstmt.setInt(5, productID);
 	    int rowCount = pstmt.executeUpdate();
 
@@ -90,6 +97,7 @@ try {
 	} %>
 	
 	Hello <%= name %> <p/>
+	<a href="categories.jsp">Click for Categories</a></p>
 	
 	<div style="width:150px;float:left;display:inline-block;">
 		<div class="filter">
@@ -118,13 +126,13 @@ try {
 	String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
 	
 	if (action != null && action.equals("search") && category.equals("all")) {
-		pstmt = conn.prepareStatement("SELECT "+ sel+ " FROM (categories JOIN products ON categories.ID=products.category WHERE categories.owner = ?) WHERE products.name = ?");	
+		pstmt = conn.prepareStatement("SELECT "+ sel+ " FROM (categories JOIN products ON categories.ID=products.category WHERE categories.owner = ?) WHERE products.name LIKE ?");	
 		pstmt.setInt(1, ownerID);
 		pstmt.setString(2, "%"+searchFor+"%");
 		rs = pstmt.executeQuery();
 	}
 	else if (action != null && action.equals("search")) {
-		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name = ? AND categories.ID=products.category");
+		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name LIKE ? AND categories.ID=products.category");
 		pstmt.setInt(1, ownerID);
 		pstmt.setString(2, "%"+searchFor+"%");
 		rs = pstmt.executeQuery();
@@ -166,7 +174,7 @@ try {
 			<form action="products.jsp?category=all" method="POST">
 		   		<td><input value="<%=rs.getString("productName")%>" name="productName" size="10"/></td>
 		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="10"/></td>
-		    	<td><select name="productCategory" width="10">
+		    	<td><select name="categoryName" width="10">
 		    			<option value="<%=rs.getString("catName")%>"><%=rs.getString("catName")%></option>
 						<% 
 						for (int i = 0; i < categoryDrop.size(); i++) { 
@@ -197,7 +205,13 @@ catch (SQLException e) {
 	Requested data modification failed. <p/>
 	<a href="products.jsp?category=all">Click here to go back to Products</a>
 	<%
-    
+}
+catch (NumberFormatException nfe) {
+	%>
+	Failure to insert new product<p/>
+	<a href="products.jsp?category=all">Click here to go back to Products</a>
+	<%
+	nfe.printStackTrace();
 }
 finally {
     if (rs != null) {
