@@ -105,8 +105,9 @@ Categories:<br>
     {
     	%>
     		<br><input type="submit" name="category" value=<%=categories.get(i)%>>
-		</form><%
+		<%
     }
+    %></form><% 
     
 %>
 
