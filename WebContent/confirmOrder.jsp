@@ -19,12 +19,12 @@ returnlink
 }
 </style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Buy Cart</title>
+<title>Confirm Order</title>
 </head>
 <body>
 <% String name = (String)session.getAttribute("sessionName"); %>
-Hello <%= name %>
-<returnlink><a href="browse.jsp">Return to Product Browsing</a></returnlink>
+Hello <%=name%>
+
 <%-- set up connection --%>
 <%
 	Connection conn = null;
@@ -41,7 +41,7 @@ Hello <%= name %>
 	        "user=postgres&password=postgres");
 	
 %>
-
+<returnlink><a href="browse.jsp">Return to Product Browsing</a></returnlink>
 <%-- code below displays user's cart and total cost --%>
 <%
 	//string for checking if the user pressed the buy button
@@ -58,7 +58,10 @@ Hello <%= name %>
 	
 	
 	double totalPrice = 0;
-	
+	if(action != null && action.equals("buy"))
+	{
+		%>, you have successfully purchased <%
+	}
 %>
 <table border="1">
         <tr>
@@ -119,16 +122,30 @@ Hello <%= name %>
         	if(nameSet != null){ nameSet.close();}
         	if(prices != null){ prices.close();}
         	conn.setAutoCommit(true);
-        	
+        	if(action != null && action.equals("buy")){
+        		%> for $<%=totalPrice%>:<%
+        	}
+        	else {
         %>
-        </table>
-        Total cost is $<%=totalPrice%>:<br>
-        Credit Card Number: <br>
-		<form action="confirmOrder.jsp" method=POST>
-			<input type="hidden" name="action" value="buy"/>
-			<input type="text" name="ccNum" size="15"/>
-			<button type="submit">Purchase</button>
-		</form>
+        	An error occured and your transaction did not go through.
+		<% 
+        	}
+        	
+		if(action != null && action.equals("buy"))
+		{
+			conn.setAutoCommit(false);
+			pstmt = conn.prepareStatement("UPDATE users SET creditCard=? WHERE id=?");
+			pstmt.setString(1, (String)request.getAttribute("ccNum"));
+			pstmt.setInt(2, uid);
+			pstmt.executeUpdate();
+			pstmt = conn.prepareStatement("DELETE FROM inCart WHERE id=?");
+			pstmt.setInt(1, uid);
+			pstmt.executeUpdate();
+	        // Commit transaction
+	        conn.commit();
+	        conn.setAutoCommit(true);
+			}
+        %>
         <%-- -------- Close Connection Code -------- --%>
         <%
             // Close the ResultSet
