@@ -38,42 +38,30 @@ try {
     
 	int ownerID = Integer.parseInt((String)session.getAttribute("sessionID"));
 				
+	if (action != null && action.equals("update")) {
+		String productName = request.getParameter("productName");
+		String sku = request.getParameter("sku");
+		String productCategory = request.getParameter("productCategory");
+		java.math.BigDecimal price = new java.math.BigDecimal(request.getParameter("price"));
+		int productID = Integer.parseInt(request.getParameter("productID"));
+
 		// Start Transaction
-// 		conn.setAutoCommit(false);
+		conn.setAutoCommit(false);
 	    
-// 	    pstmt = conn.prepareStatement("UPDATE categories SET name = ?, description = ?  WHERE ID = ?");
-// 	    pstmt.setString(1, categoryName);
-// 	    pstmt.setString(2, description);
-// 	    pstmt.setInt(3, categoryID);
-// 	    int rowCount = pstmt.executeUpdate();
+	    pstmt = conn.prepareStatement("UPDATE products SET name = ?, sku = ?, category = ?, price = ? WHERE ID = ?");
+	    pstmt.setString(1, productName);
+	    pstmt.setString(2, sku);
+	    pstmt.setInt(3, productID);
+	    pstmt.setBigDecimal(4, price);
+	    pstmt.setInt(5, productID);
+	    int rowCount = pstmt.executeUpdate();
 
-// 	    if (rowCount > 0) {
-// 		    conn.commit();
-// 		    conn.setAutoCommit(true);
-// 		    // End Transaction
-// 	    }
-		
-// 	}
-// 	if (action != null && action.equals("update")) {
-// 		String categoryName = request.getParameter("categoryName");
-// 		String description = request.getParameter("description");
-// 		int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-
-// 		// Start Transaction
-// 		conn.setAutoCommit(false);
-	    
-// 	    pstmt = conn.prepareStatement("UPDATE categories SET name = ?, description = ?  WHERE ID = ?");
-// 	    pstmt.setString(1, categoryName);
-// 	    pstmt.setString(2, description);
-// 	    pstmt.setInt(3, categoryID);
-// 	    int rowCount = pstmt.executeUpdate();
-
-// 	    if (rowCount > 0) {
-// 		    conn.commit();
-// 		    conn.setAutoCommit(true);
-// 		    // End Transaction
-// 	    }
-// 	}	
+	    if (rowCount > 0) {
+		    conn.commit();
+		    conn.setAutoCommit(true);
+		    // End Transaction
+	    }
+	}
 
 // 	if (action != null && action.equals("delete")) {
 // 		int categoryID = Integer.parseInt(request.getParameter("categoryID"));
@@ -141,12 +129,11 @@ try {
 <!-- 			        <input type="hidden" name="action" value="insert"/> -->
 					<td><input type="text" value="" name="productName" size="15"/></td>
 			        <td><input type="text" value="" name="sku" size="15"/></td>
-			     
 			        <td><select name="productCategory" width="15">
 					<% for (int i = 0; i < categoryDrop.size(); i++) { %>
 							<option value="<%= categoryDrop.get(i)%>"><%= categoryDrop.get(i)%></option>
 					<% } %>
-				  		</select></td> 
+				  		</select></td>
 			        <td><input type="text" value="" name="price" size="15"/></td>
 			        <td><input type="submit" value="Insert"/></td>
 		        </form>
@@ -154,6 +141,7 @@ try {
 		</table>
  	</div>
 	
+
 	<%
 	String searchFor = request.getParameter("query");
 	String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
@@ -183,13 +171,13 @@ try {
 	
  	while (rs.next()) {	%>
 		<tr>
-			<form action="categories.jsp" method="POST">
+			<form action="products.jsp?category=all" method="POST">
 		   		<td><input value="<%=rs.getString("productName")%>" name="productName" size="15"/></td>
 		    	<td><input value="<%=rs.getString("sku")%>" name="sku" size="15"/></td>
-		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td>
 		    	<td><input value="<%=rs.getString("catName")%>" name="productCategory" size="15"/></td>
+		    	<td><input value="<%=rs.getInt("price")%>" name="price" size="15"/></td>
 		    	<input type="hidden" name="action" value="update"/>
-<%-- 	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/> --%>
+	        	<input type="hidden" name="productID" value="<%= rs.getInt("pID")%>"/>
 			    <td><input type="submit" value="Update"></td>
 	   		</form>
 	   	</tr>
