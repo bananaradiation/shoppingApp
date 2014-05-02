@@ -126,15 +126,16 @@ try {
 	String sel = "products.ID AS pID, products.name AS productName, sku, price, categories.name AS catName";
 	
 	if (action != null && action.equals("search") && category.equals("all")) {
-		pstmt = conn.prepareStatement("SELECT "+ sel+ " FROM (categories JOIN products ON categories.ID=products.category WHERE categories.owner = ?) WHERE products.name LIKE ?");	
+		pstmt = conn.prepareStatement("SELECT "+ sel+ " FROM categories JOIN products ON categories.ID=products.category WHERE categories.owner = ? AND products.name LIKE ?");	
 		pstmt.setInt(1, ownerID);
 		pstmt.setString(2, "%"+searchFor+"%");
 		rs = pstmt.executeQuery();
 	}
 	else if (action != null && action.equals("search")) {
-		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories, products WHERE categories.owner = ? AND products.name LIKE ? AND categories.ID=products.category");
+		pstmt = conn.prepareStatement("SELECT "+sel+ " FROM categories JOIN products ON categories.ID=products.category WHERE categories.owner = ? AND products.name LIKE ? AND categories.name = ?");
 		pstmt.setInt(1, ownerID);
 		pstmt.setString(2, "%"+searchFor+"%");
+		pstmt.setString(3, category);
 		rs = pstmt.executeQuery();
 	}
 	else if (category != null && category.equals("all")) {
