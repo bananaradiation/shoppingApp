@@ -102,26 +102,24 @@ try {
 	Statement statement = conn.createStatement();
 	rs = statement.executeQuery("SELECT name, description, ID FROM categories"); %>
 	
-	Hello <%= name %>
+	Hello <%= name %> <p/>
+	<a href="products.jsp?category=all">Click to go to Products</a></p>
 
-	<!-- Add an HTML table header row to format the results -->
-	<table width="90%">
+	<div class="content">
+	<table>
 		<tr>
 			<th>Category Name</th>
 		    <th>Description</th>
 		</tr>
-	<!--first line of table for inserting new categories -->
 		<tr>
 			<form action="categories.jsp" method="POST">
 		        <input type="hidden" name="action" value="insert"/>
 				<td><input type="text" value="" name="categoryName" size="15"/></td>
-		        <td><input type="text" name="description" size="50"/></td>
+		        <td><input type="text" name="description" size="40"/></td>
 		        <td><input type="submit" value="Insert"/></td>
 	        </form>
 		</tr> 
-
 	<%
-	// Iteration Code
 	while (rs.next()) {
 		// check if category name has products associated with it
     	Boolean deleteOK = false;
@@ -134,7 +132,7 @@ try {
 		%>
 		<tr>
 			<form action="categories.jsp" method="POST"> 		
-		   		<td><input value="<%=rs.getString("name")%>" name="categoryName" size="20"/></td>
+		   		<td><input value="<%=rs.getString("name")%>" name="categoryName" size="15"/></td>
 		    	<td><input value="<%=rs.getString("description")%>" name="description" size="40"/></td>
 		    	<input type="hidden" name="action" value="update"/>
 	        	<input type="hidden" name="categoryID" value="<%= rs.getInt("ID")%>"/>
@@ -148,9 +146,11 @@ try {
 			    	<td><input type="submit" value="Delete"/></td>
     			</form> <%
 			} %>
-		</tr> 
-	</table> <%
-	}
+		</tr> <%
+	} %>	
+	</table>
+	</div> <%
+	
 
 	rs.close();
 	statement.close();
