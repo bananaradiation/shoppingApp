@@ -24,7 +24,8 @@ buylink
 <body>
 <% String name = (String)session.getAttribute("sessionName"); %>
 Hello <%= name %>
-<buylink><a href="/ShoppingApplication/buyCart.jsp">Buy Shopping Cart</a></buylink>
+<buylink><a href="buyCart.jsp">Buy Shopping Cart</a><br>
+<a href="browse.jsp">Continue Browsing Products</a></buylink>
 
 <%-- set up connection --%>
 <%
@@ -59,36 +60,52 @@ Hello <%= name %>
 		
 		if(placeOrder != null)
 		{
-			//begin transaction
 			conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement("SELECT id FROM products WHERE products.name=?");
 			pstmt.setString(1, placeOrder);
 			rs = pstmt.executeQuery();
 			rs.next();
-			%> 
-			<table border="1">
-        	<tr>
-            	<th>name</th>
-           		<th>quantity</th>
-        	</tr>
-        	<tr>
-        		<form action="browse.jsp" method=POST>
-        			<input type="hidden" name="addItem" value="<%=placeOrder%>">
-        			<td><%=placeOrder%></td>
-        			<td><input type="text" name="quantity"></tr>
-        			<td><input type="submit" value="Add to Cart"></table>
-        		</form>
-        	</tr>
-        	</table>
-			<%
-			//int pid = rs.getInt("id");
-			//pstmt = conn.prepareStatement("INSERT INTO inCart (id, product) VALUES (?,?)");
-			//pstmt.setInt(1, uid);
-			//pstmt.setInt(2, pid);
-			
-			//end transaction
-			//pstmt.executeUpdate();
-			//conn.commit();
+			int pid = rs.getInt("id");
+			pstmt = conn.prepareStatement("SELECT * FROM inCart WHERE id=? AND product=?");
+			pstmt.setInt(1, uid);
+			pstmt.setInt(2, pid);
+			rs = pstmt.executeQuery();
+			if(rs.next())
+			{
+				%>, you already have this item in your cart <%
+			}
+			else
+			{
+				//begin transaction
+				pstmt = conn.prepareStatement("SELECT id FROM products WHERE products.name=?");
+				pstmt.setString(1, placeOrder);
+				rs = pstmt.executeQuery();
+				rs.next();
+				%> 
+				<table border="1">
+	        	<tr>
+	            	<th>name</th>
+	           		<th>quantity</th>
+	        	</tr>
+	        	<tr>
+	        		<form action="browse.jsp" method=POST>
+	        			<input type="hidden" name="addItem" value="<%=placeOrder%>">
+	        			<td><%=placeOrder%></td>
+	        			<td><input type="text" name="quantity"></tr>
+	        			<td><input type="submit" value="Add to Cart"></table>
+	        		</form>
+	        	</tr>
+	        	</table>
+				<%
+				//int pid = rs.getInt("id");
+				//pstmt = conn.prepareStatement("INSERT INTO inCart (id, product) VALUES (?,?)");
+				//pstmt.setInt(1, uid);
+				//pstmt.setInt(2, pid);
+				
+				//end transaction
+				//pstmt.executeUpdate();
+				//conn.commit();
+			}
 			conn.setAutoCommit(true);
 		}
 	
