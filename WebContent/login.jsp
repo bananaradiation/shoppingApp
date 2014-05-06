@@ -70,6 +70,9 @@ else{
 	        conn.commit();
 	        conn.setAutoCommit(true);
 	    }
+	    else {
+	    	%>Your sign up failed<%
+	    }
 	    conn.close();
 	} 
 	catch (SQLException e) {
