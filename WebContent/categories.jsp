@@ -1,190 +1,181 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
-<%@ page import="java.util.*"%>
-<%@ page import="java.io.*"%>
-<%@ page import="java.sql.*" %>
-<%@ page import="org.postgresql.*" %>
-
-<html>
+<%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*" import="database.*"   import="java.util.*" errorPage="" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<title>Categories</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>CSE135</title>
 </head>
 
 <body>
-
+<%@include file="welcome.jsp" %>
 <%
+if(session.getAttribute("name")!=null)
+{
 
-// Get parameters from home.jsp or categories.jsp
-String action = request.getParameter("action");
-String name = (String)session.getAttribute("sessionName");
+	Connection conn=null;
+	Statement stmt;
+	try
+	{
+		try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+		String url="jdbc:postgresql://127.0.0.1:5432/P1";
+		String user="postgres";
+		String password="880210";
+		conn =DriverManager.getConnection(url, user, password);
+		stmt =conn.createStatement();
+		ResultSet rs=null;
+		String name="", des="";
 
-Connection conn = null;
-PreparedStatement pstmt = null;
-ResultSet rs = null;
-String selectSQL;
-Statement st = null;
-
-try {
-    // Registering Postgresql JDBC driver with the DriverManager
-    Class.forName("org.postgresql.Driver");
-
-    // Open a connection to the database using DriverManager
-    conn = DriverManager.getConnection(
-        "jdbc:postgresql://localhost/cse135?" +
-        "user=postgres&password=postgres");
-    
-	int ownerID = Integer.parseInt((String)session.getAttribute("sessionID"));
-	
-	if (action != null && action.equals("insert")) {
-		String categoryName = request.getParameter("categoryName");
-		String description = request.getParameter("description");
-
-		// Start transaction
-	    conn.setAutoCommit(false);
-
-	    pstmt = conn
-	    .prepareStatement("INSERT INTO categories (name, description, owner) VALUES (?, ?, ?)");
-	    
-	    pstmt.setString(1, categoryName);
-	    pstmt.setString(2, description);
-	    pstmt.setInt(3, ownerID);
-	    int rowCount = pstmt.executeUpdate();
-
-	    if (rowCount > 0) { 
-		    conn.commit();
-		    conn.setAutoCommit(true);
-		    // End Transaction
-	    }
-	}
-
-	if (action != null && action.equals("update")) {
-		String categoryName = request.getParameter("categoryName");
-		String description = request.getParameter("description");
-		int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-
-		// Start Transaction
-		conn.setAutoCommit(false);
-	    
-	    pstmt = conn.prepareStatement("UPDATE categories SET name = ?, description = ?  WHERE ID = ?");
-	    pstmt.setString(1, categoryName);
-	    pstmt.setString(2, description);
-	    pstmt.setInt(3, categoryID);
-	    int rowCount = pstmt.executeUpdate();
-
-	    if (rowCount > 0) {
-		    conn.commit();
-		    conn.setAutoCommit(true);
-		    // End Transaction
-	    }
-	}	
-
-	if (action != null && action.equals("delete")) {
-		int categoryID = Integer.parseInt(request.getParameter("categoryID"));
-        // Start transaction
-        conn.setAutoCommit(false);
-
-        pstmt = conn.prepareStatement("DELETE FROM categories WHERE ID = ?");
-        pstmt.setInt(1, categoryID);
-        int rowCount = pstmt.executeUpdate();
-
-        if (rowCount > 0) {
-	        conn.commit();
-	        conn.setAutoCommit(true);
-			// End transaction
-        }
-	}
-	
-	// populate table with database categories
-	Statement statement = conn.createStatement();
-	pstmt = conn.prepareStatement("SELECT name, description, ID FROM categories WHERE categories.owner = ?");
-	pstmt.setInt(1, ownerID);
-	rs = pstmt.executeQuery();
-	%>
-	
-	Hello <%= name %> <p/>
-	<a href="products.jsp?category=all">Click to go to Products</a></p>
-
-	<div class="content">
-	<table>
-		<tr>
-			<th>Category Name</th>
-		    <th>Description</th>
+		String action=null, id_str=null;
+		try { action	  = request.getParameter("action");}catch(Exception e){action  = null;}
+		try {id_str	  = request.getParameter("id");}catch(Exception e){id_str =	null;}
+		name=null; des=null;
+		try { 
+			name	=	request.getParameter("name"); 
+			des		=	request.getParameter("des"); 
+		}
+		catch(Exception e) 
+		{ 
+			name	=	null; 
+			des		=	null; 
+		}
+		if(("insert").equals(action))
+		{
+			String  SQL_1="INSERT INTO categories (name, description) VALUES('"+name+"','"+des+"');";
+			try{
+			conn.setAutoCommit(false);
+			stmt.execute(SQL_1);
+			conn.commit();
+			conn.setAutoCommit(true);
+			}
+			catch(Exception e)
+			{
+				out.println("Fail! Please <a href=\"categories.jsp\" target=\"_self\">insert it</a> again.");
+			}
+		}
+		else if(("update").equals(action))
+		{
+			 String  SQL_2="update categories set name='"+name+"' , description='"+des+"' where id="+id_str+";";
+			try{
+				conn.setAutoCommit(false);
+				stmt.execute(SQL_2);
+				conn.commit();
+				conn.setAutoCommit(true);
+			}
+			catch(Exception e)
+			{
+				out.println(SQL_2);
+				out.println("Fail! Please <a href=\"categories.jsp\" target=\"_self\">update it</a> again.");
+			}
+		}
+		if(("delete").equals(action))
+		{
+		 	 String  SQL_1="select count(*) from products where cid="+id_str+";";
+			String  SQL_2="delete from categories where id="+id_str+";";
+			try{
+				rs=stmt.executeQuery(SQL_1);
+				int count=-1;
+				while(rs.next())
+				{
+					 count=rs.getInt(1);
+				} 
+				
+				if(count<=0)
+				{
+					conn.setAutoCommit(false);
+					stmt.execute(SQL_2);
+					conn.commit();
+					conn.setAutoCommit(true);
+				}
+			}
+			catch(Exception e)
+			{
+				out.println("Fail! Please try again in the <a href=\"categories.jsp\" target=\"_self\">categories page</a>.<br><br>");
+			}
+		}
+%>
+	<table width="100%"  border="1px" align="center">
+	<tr align="center"><td width="20%"><B>Category Name</B></td><td width="60%"><B>Category Description</B></td><td width="5%"><B>Count</B></td><td width="15%" colspan="2"><B>Operations</B></td></tr>
+	<form action="categories.jsp" method="post">
+	<input type="text" name="action" id="action" value="insert" style="display:none">
+	<tr align="center"><td width="20%"><input type="text" name="name" id="name" size="30" ></td><td width="60%"><textarea cols="90" rows="4" name="des" id="des"></textarea></td><td width="5%">0</td><td width="15%" colspan="2"><input type="submit"  value="Insert"></td></tr>
+    </form>
+<%		
+	    int id=0,count=0;
+		rs=stmt.executeQuery("select c.id, c.name, c.description, count(p.id) as number from categories c, products p where c.id=p.cid group by c.id, c.name, c.description order by c.id asc;");
+		while(rs.next())
+		{
+			id=rs.getInt(1);
+			 name=rs.getString(2);
+			 des=rs.getString(3);
+			 count=rs.getInt(4);
+%>
+			<tr align="center">
+				<form action="categories.jsp" method="post">
+					<input type="text" name="action" id="action" value="update" style="display:none">
+					<input type="text" name="id" id="id" value="<%=id%>" style="display:none">
+					<td width="20%"><input type="text" name="name" id="name" value="<%=name%>" size="30"></td>
+					<td width="60%"><textarea cols="90" rows="4" name="des" id="des"><%=des%></textarea></td>
+					<td width="5%"><%=count%></td>
+					<td width="7%"><input type="submit" value="Update"></td>
+				</form>
+<%			 
+			 if(count<=0)
+			 {
+%>			 
+				
+				<form action="categories.jsp" method="post">
+					<input type="text" name="action" id="action" value="delete" style="display:none">
+					<input type="text" name="id" id="id" value="<%=id%>" style="display:none">
+					<td width="8%"><input type="submit" value="Delete"></td>
+				</form>
+				</tr>
+<%				
+			}
+			else
+			{
+%>			
+				<td width="8%"><input type="button" value="Delete" disabled="disabled"></td>	
+<%
+			}
+			out.println("</tr>");
+		}
+		rs=stmt.executeQuery("select * from categories where id not in (select cid from products);");
+		while(rs.next())
+		{
+			id=rs.getInt(1);
+			name=rs.getString(2);
+			des=rs.getString(3);
+%>			
+	<tr align="center">
+			<form action="categories.jsp" method="post">
+				<input type="text" name="action" id="action" value="update" style="display:none">
+				<input type="text" name="id" id="id" value="<%=id%>" style="display:none">
+				<td width="20%"><input type="text" name="name" id="name" value="<%=name%>" size="30"></td>
+				<td width="60%"><textarea cols="90" rows="4" name="des" id="des"><%=des%></textarea></td>
+				<td width="5%">0</td>
+				<td width="7%"><input type="submit" value="Update"></td>
+			</form>
+			<form action="categories.jsp" method="post">
+				<input type="text" name="action" id="action" value="delete" style="display:none">
+				<input type="text" name="id" id="id" value="<%=id%>" style="display:none">
+				<td width="8%"><input type="submit" value="Delete"></td>
+			</form>
 		</tr>
-		<tr>
-			<form action="categories.jsp" method="POST">
-		        <input type="hidden" name="action" value="insert"/>
-				<td><input type="text" value="" name="categoryName" size="15"/></td>
-		        <td><input type="text" name="description" size="40"/></td>
-		        <td><input type="submit" value="Insert"/></td>
-	        </form>
-		</tr> 
-	<%
-	while (rs.next()) {
-		// check if category name has products associated with it
-    	Boolean deleteOK = false;
-		pstmt = conn.prepareStatement("SELECT products.ID FROM products JOIN categories ON products.category=categories.ID WHERE categories.owner = ?");
-  		pstmt.setInt(1, ownerID);
-  		ResultSet rs2 = pstmt.executeQuery();
-  		if (!rs2.next()) {
-  			deleteOK = true;
-  		}
-		%>
-		<tr>
-			<form action="categories.jsp" method="POST"> 		
-		   		<td><input value="<%=rs.getString("name")%>" name="categoryName" size="15"/></td>
-		    	<td><input value="<%=rs.getString("description")%>" name="description" size="40"/></td>
-		    	<input type="hidden" name="action" value="update"/>
-	        	<input type="hidden" name="categoryID" value="<%= rs.getInt("ID")%>"/>
-			    <td><input type="submit" value="Update"></td>
-    		</form> 
-    		<%
-    		if (deleteOK) { %>
-         		<form action="categories.jsp" method="POST">
-		 	        <input type="hidden" name="action" value="delete"/>
-		 	        <input type="hidden" name="categoryID" value="<%= rs.getInt("ID") %>"/>
-			    	<td><input type="submit" value="Delete"/></td>
-    			</form> <%
-			} %>
-		</tr> <%
-	} %>	
-	</table>
-	</div> <%
-	
-
-	rs.close();
-	statement.close();
-	conn.close();
+<%			
+		}
+		out.println("</table>");
+	}
+	catch(Exception e)
+	{
+		out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
+	}
+	finally
+	{
+		conn.close();
+	}
 }
-catch (SQLException e) {
-	%>
-	Requested data modification failed. <p/>
-	<a href="categories.jsp">Click here to go back to Categories</a>
-    <% 
-    e.printStackTrace();
-}
-finally {
-    if (rs != null) {
-        try {
-            rs.close();
-        } catch (SQLException e) { } // Ignore
-        rs = null;
-    }
-    if (pstmt != null) {
-        try {
-            pstmt.close();
-        } catch (SQLException e) { } // Ignore
-        pstmt = null;
-    }
-    if (conn != null) {
-        try {
-            conn.close();
-        } catch (SQLException e) { } // Ignore
-        conn = null;
-    }
+else
+{
+	out.println("Please go to home page to login first.");
 }
 %>
 

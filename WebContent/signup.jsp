@@ -1,57 +1,137 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
-<%@ page import="java.util.*"%>
-<%@ page import="java.io.*"%>
-<%@ page import="java.sql.*" %>
-<%@ page import="org.postgresql.*" %>
-
-<html>
+<%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*" import="java.util.*" errorPage="" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-
-<title>Shopping App: Sign-up Page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>CSE135</title>
+<script type="text/javascript" src="js/js.js" language="javascript"></script>
 </head>
-
 <body>
-	<%  
-	ArrayList<String> roles = new ArrayList<String>();
-		roles.add("Owner");
-		roles.add("Customer");
+<%
+session.removeAttribute("name");
+session.removeAttribute("userID");
 
-	String stateList[] = {"Alabama","Alaska","Arizona","Arkansas",
-	   "California","Colorado","Connecticut","Delaware","Florida","Georgia",
-	   "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
-	   "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
-	   "Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire",
-	   "New Jersey","New Mexico","New York","North Carolina","North Dakota",
-	   "Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
-	   "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
-	   "Virginia","Washington","West Virginia","Wisconsin","Wyoming"};
+%>
+<table width="100%" align="center"><tr><td align="left"><a href="login.jsp">Home</a></td></tr></table>
+<form action="signup.jsp" method="post">
+<table align="center">
+	<tr><td>Name:</td><td><input type="text" id="name" name="name"></td></tr>
+	<tr>
+		<td>Role:</td>
+		<td>
+			<select id="role" name="role">
+				<option>owner</option>
+				<option>customer</option>
+			</select>
+		</td>
+	</tr>
+	<tr><td>Age:</td><td><input type="text" id="age" name="age"></td></tr>
+	<tr><td>State:</td>
+		<td>
+			<select id="state" name="state">
+				<option>Alabama</option> 
+				<option>Alaska</option>
+				<option>Arizona</option>
+				<option>Arkansas</option>
+				<option>California</option>
+				<option>Colorado</option>
+				<option>Connecticut</option>
+				<option>Delaware</option>
+				<option>Florida</option>
+				<option>Georgia</option>
+				<option>Hawaii</option>
+				<option>Idaho</option>
+				<option>Illinois</option>
+				<option>Indiana</option>
+				<option>Iowa</option>
+				<option>Kansas</option>
+				<option>Kentucky</option>
+				<option>Louisiana</option>
+				<option>Maine</option>
+				<option>Maryland</option>
+				<option>Massachusetts</option>
+				<option>Michigan</option>
+				<option>Minnesota</option>
+				<option>Mississippi</option>
+				<option>Missouri</option>
+				<option>Montana</option>
+				<option>Nebraska</option>
+				<option>Nevada</option>
+				<option>New Hampshire</option>
+				<option>New Jersey</option>
+				<option>New Mexico</option>
+				<option>New York</option>
+				<option>North Carolina</option>
+				<option>North Dakota</option>
+				<option>Ohio</option>
+				<option>Oklahoma</option>
+				<option>Oregon</option>
+				<option>Pennsylvania</option>
+				<option>Rhode Island</option>
+				<option>South Carolina</option>
+				<option>South Dakota</option>
+				<option>Tennessee</option>
+				<option>Texas</option>
+				<option>Utah</option>
+				<option>Vermont</option>
+				<option>Virginia</option>
+				<option>Washington</option>
+				<option>West Virginia</option>
+				<option>Wisconsin</option>
+				<option>Wyoming</option>
+
+			</select>
+		</td>
+	</tr>
+	<tr><td><input type="submit" value="Signup"></td><td><input type="button" value="Reset"></td></tr>
+</table>
+</form>
+<%
+String name=null, role=null, age=null, state=null;
+try { name=request.getParameter("name"); }catch(Exception e) { name=null; }
+try { role=request.getParameter("role"); }catch(Exception e) { role=null; }
+try { age=request.getParameter("age"); }catch(Exception e) { age=null; }
+try { state=request.getParameter("state"); }catch(Exception e) { state=null; }
+
+
+if(name!=null && age!=null && role!=null && state!=null)
+{
+	Connection conn=null;
+	Statement stmt;
+	
+	try
+	{
+		String  SQL="INSERT INTO users (name, role, age, state) VALUES('"+name+"','"+role+"',"+age+",'"+state+"');";
+		try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+		String url="jdbc:postgresql://127.0.0.1:5432/P1";
+		String user="postgres";
+		String password="880210";
+		conn =DriverManager.getConnection(url, user, password);
+		stmt =conn.createStatement();
+		try{
+			conn.setAutoCommit(false);
+			stmt.execute(SQL);
+			conn.commit();
+			conn.setAutoCommit(true);
+			out.println("Register successfully. <br>");
+			out.println("<table><tr><td>Name:</td><td>"+name+"</td></tr><tr><td>Role:</td><td>"+role+"</td></tr><tr><td>Age:</td><td>"+age+"</td></tr><tr><td>State:</td><td>"+state+"</td></tr></table>");
+			out.println("Please go back to <a href='login.jsp' target='_self'>login</a>.");
+		}
+		catch(SQLException e)
+		{
+			out.println("Fail, can not access the database, please check the database status first! Please <a href='signup.jsp' target='_self'>register</a> again.");
+		}
 		
-	ArrayList<String> states = new ArrayList<String>();
-	for (int i = 0; i < 50; i++) {
-		states.add(stateList[i]);
 	}
-    %>
-    
-    <h2>Sign Up Now!</h2>
-		<form action="login.jsp" method="POST">
+	catch(Exception e)
+	{
+			out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
+	}
+	finally
+	{
+		conn.close();
+	}
+}
+%>
 
-		Name: <input type="text" name="name" size="20"/><p/>
-		Role: <select name="role">
-					<option value="owner">Owner</option>
-					<option value="customer">Customer</option>
-			  </select><p/>
-		Age: <input type="text" name="age" size="20"/><p/>
-		State: <select name="state">
-				<% for (int i = 0; i < 50; i++) { %>
-					<option value="<%=stateList[i]%>"><%=stateList[i]%></option>
-				<% } %>
-			  </select><p/>
-		<button type="submit">Sign Up</button>
-		</form>
 </body>
 </html>
