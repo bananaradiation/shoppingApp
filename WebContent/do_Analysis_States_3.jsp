@@ -50,6 +50,8 @@ try
 	stmt_2 =conn.createStatement();
 	stmt_3 =conn.createStatement();
 	/**SQL_1 for (state, amount)**/
+	
+	
 	String SQL_1="select p.id, p.name, sum(c.quantity*p.price) as amount from products p, sales c "+
 				 "where c.pid=p.id "+
 				 "group by p.name,p.id "+
