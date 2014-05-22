@@ -50,16 +50,16 @@ try
 	stmt_2 =conn.createStatement();
 	stmt_3 =conn.createStatement();
 	/**SQL_1 for (state, amount)**/
-	String SQL_1="select p.id, p.name, sum(c.quantity*p.price) as amount from products p, carts c "+
+	String SQL_1="select p.id, p.name, sum(c.quantity*p.price) as amount from products p, sales c "+
 				 "where c.pid=p.id "+
 				 "group by p.name,p.id "+
 				 "order by  p.name asc "+
-				 "limit 9;";
-	String SQL_2="select  u.state, sum(c.quantity*p.price) as amount from users u, carts c,  products p "+
+				 "limit 10;";
+	String SQL_2="select  u.state, sum(c.quantity*p.price) as amount from users u, sales c,  products p "+
 				  "where c.uid=u.id and c.pid=p.id "+ 
 				  "group by u.state "+ 
 				  "order by u.state asc "+
-				  "limit 19;";
+				  "limit 20;";
 
 	rs=stmt.executeQuery(SQL_1);
 	int p_id=0;
@@ -121,7 +121,7 @@ try
 			p_name			=	p_list.get(j).getName();
 			p_amount_price	=	p_list.get(j).getAmount_price();
 			
-			SQL_3="select sum(c.quantity*p.price) as amount from users u, products p, carts c "+
+			SQL_3="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
 				 "where c.uid=u.id and c.pid=p.id and u.state='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
 
 			 rs_3=stmt_3.executeQuery(SQL_3);

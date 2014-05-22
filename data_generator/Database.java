@@ -14,9 +14,9 @@ public class Database
 	{
 	   try{
 	    try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-		String url="jdbc:postgresql://localhost/cse135";
-		String user="postgres";
-		String password="postgres";
+	    String url="jdbc:postgresql://localhost/cse135"; //database name
+	    String user="postgres";							 //username
+	    String password="postgres";						//password
 	    conn=DriverManager.getConnection(url, user, password);
 	    return true;
 	    }
@@ -39,6 +39,7 @@ public class Database
 		dropCreateTable("DROP TABLE categories CASCADE;","CREATE TABLE categories(id SERIAL PRIMARY KEY,name TEXT NOT NULL UNIQUE, description TEXT);");
 		dropCreateTable("DROP TABLE products CASCADE;","CREATE TABLE products (id SERIAL PRIMARY KEY,cid INTEGER REFERENCES categories (id) ON DELETE CASCADE,name TEXT NOT NULL,SKU TEXT NOT NULL UNIQUE,price INTEGER NOT NULL);");
 		dropCreateTable("DROP TABLE sales CASCADE;","CREATE TABLE sales (id SERIAL PRIMARY KEY,uid INTEGER REFERENCES users (id) ON DELETE CASCADE,pid INTEGER REFERENCES products (id) ON DELETE CASCADE,quantity INTEGER NOT NULL, price INTEGER NOT NULL);");
+		dropCreateTable("DROP TABLE carts CASCADE;","CREATE TABLE carts (id SERIAL PRIMARY KEY,uid INTEGER REFERENCES users (id) ON DELETE CASCADE,pid INTEGER REFERENCES products (id) ON DELETE CASCADE,quantity INTEGER NOT NULL, price INTEGER NOT NULL);");
 	}
 	public boolean dropCreateTable(String sql, String sql2) throws SQLException
 	{

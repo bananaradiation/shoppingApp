@@ -114,6 +114,7 @@ else
 	    out.print("<tr align=\"center\"><td colspan=\"2\"><font color=\"#FF0000\">Welcome owner \""+name+"\"</font><br>");
 		out.print("<a href=\"categories.jsp\">Manage Categories</a><br>");
 		out.print("<a href=\"products.jsp\">Manage Products</a><br>");
+		out.print("<a href=\"analytics.jsp\">Sales Analytics</a><br>");
 		out.print("<a href=\"login.jsp?flag=-1\"> Change an account</a><br>");
 		out.print("</td></tr>");
 	}
