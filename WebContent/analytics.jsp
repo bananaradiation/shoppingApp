@@ -73,17 +73,31 @@ try
          "where s.pid=p.id "+
          "group by p.name,p.id "+
          "order by p.name asc "+
-         "limit 10;";
-    
+         "limit 10;";    
     String SQL_prod_cat="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s, categories c "+
              "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
              " group by p.name,p.id "+
              "order by p.name asc "+
              "limit 10;";         
          
-    String SQL_cust="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    String SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id "+ 
             "group by u.name "+ 
+            "order by u.name asc "+
+            "limit 20;";    
+    String SQL_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+            "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age+ 
+            " group by u.name "+ 
+            "order by u.name asc "+
+            "limit 20;";
+    String SQL_cust_age="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+            "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
+            " group by u.name "+ 
+            "order by u.name asc "+
+            "limit 20;";    
+    String SQL_cust_state="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+            "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
+            " group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";
 
@@ -99,7 +113,7 @@ try
     }
     else {
     	rs = stmt.executeQuery(SQL_prod_cat);
-    }
+    }   
     
     int p_id=0;
     String p_name=null;
@@ -117,10 +131,22 @@ try
     }
     
 //     row option
-    if("customers".equals(option) || "".equals(option)) {
-    	rs_2=stmt_2.executeQuery(SQL_cust);
+    if(option.equals("customers") || option.equals("")) {
+//     	filter state and age
+    	if (!age.equals("all") && !state.equals("all")) {
+    		rs_2=stmt_2.executeQuery(SQL_age_state);
+    	}
+    	else if (!age.equals("all")) {
+    		rs_2=stmt_2.executeQuery(SQL_cust_age);
+    	}
+    	else if (!state.equals("all")) {
+    		rs_2=stmt_2.executeQuery(SQL_cust_state);
+    	}
+    	else {
+    		rs_2=stmt_2.executeQuery(SQL_cust);
+    	}
     }
-    else if("states".equals(option)) {
+    else if(option.equals("states")) {
 	    rs_2=stmt_2.executeQuery(SQL_state);
     }
     String s_name=null;
@@ -164,15 +190,17 @@ try
     </select>
     <select name="age">
         <option value="all">All Ages</option>
-        <option value="12-18">12-18</option>
-        <option value="19-45">19-45</option>
-        <option value="46-65">46-65</option>
-        <option value="65+">65+</option>
+        <option value="12 and 18">12-18</option>
+        <option value="19 and 45">19-45</option>
+        <option value="46 and 65">46-65</option>
+        <option value="65 and 1000">65+</option>
     </select>
     <button type="submit">Run Query</button>
 </form>
 <%=option %> <br>
-<%=category %>
+<%=category %> <br>
+<%=age %> <br>
+<%=state %>  <br>
     <table align="center" width="98%" border="1">
         <tr align="center">
             <td><strong><font color="#FF0000">STATE</font></strong></td>
