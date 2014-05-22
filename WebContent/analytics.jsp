@@ -78,35 +78,50 @@ try
              "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
              " group by p.name,p.id "+
              "order by p.name asc "+
-             "limit 10;";         
-         
+             "limit 10;";
+             
+//  customer option
     String SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id "+ 
             "group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";    
-    String SQL_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    String SQL_cust_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age+ 
             " group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";
-    String SQL_cust_age="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    String SQL_cust_age="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
             " group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";    
-    String SQL_cust_state="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    String SQL_cust_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
             " group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";
-
-    String SQL_state="select  u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
+//  state option
+    String SQL_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
                   "where s.uid=u.id and s.pid=p.id "+ 
                   "group by u.state "+ 
                   "order by u.state asc "+
                   "limit 20;";
-    
+    String SQL_state_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
+            "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
+            " group by u.state "+ 
+            "order by u.state asc "+
+            "limit 20;";
+    String SQL_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
+            "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
+            " group by u.state "+ 
+            "order by u.state asc "+
+            "limit 20;";
+    String SQL_state_age_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
+            "where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ 
+            " group by u.state "+ 
+            "order by u.state asc "+
+            "limit 20;";
 //     product category filter
     if (category.equals("all")) {
     	rs = stmt.executeQuery(SQL_prod_all);
@@ -130,11 +145,10 @@ try
     
     }
     
-//     row option
+//  row options
     if(option.equals("customers") || option.equals("")) {
-//     	filter state and age
     	if (!age.equals("all") && !state.equals("all")) {
-    		rs_2=stmt_2.executeQuery(SQL_age_state);
+    		rs_2=stmt_2.executeQuery(SQL_cust_age_state);
     	}
     	else if (!age.equals("all")) {
     		rs_2=stmt_2.executeQuery(SQL_cust_age);
@@ -147,8 +161,20 @@ try
     	}
     }
     else if(option.equals("states")) {
-	    rs_2=stmt_2.executeQuery(SQL_state);
+    	if (!age.equals("all") && !state.equals("all")) {
+            rs_2=stmt_2.executeQuery(SQL_state_age_state);
+        }
+        else if (!age.equals("all")) {
+            rs_2=stmt_2.executeQuery(SQL_state_age);
+        }
+        else if (!state.equals("all")) {
+            rs_2=stmt_2.executeQuery(SQL_state_state);
+        }
+        else {
+            rs_2=stmt_2.executeQuery(SQL_state);
+        }
     }
+
     String s_name=null;
     float s_amount_price=0;
     while(rs_2.next()) {
@@ -202,9 +228,12 @@ try
 <%=age %> <br>
 <%=state %>  <br>
     <table align="center" width="98%" border="1">
-        <tr align="center">
-            <td><strong><font color="#FF0000">STATE</font></strong></td>
-<%  
+        <tr align="center"> <%
+        if (option.equals("states")) { %>
+            <td><strong><font color="#FF0000">STATE</font></strong></td>  <% }
+        else if (option.equals("customers")) { %>
+            <td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>  <% }
+    
     for(i=0;i<p_list.size();i++) {
         p_id            =   p_list.get(i).getId();
         p_name          =   p_list.get(i).getName();
