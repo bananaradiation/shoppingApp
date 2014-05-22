@@ -28,8 +28,7 @@ String stateList[] = {"Alabama","Alaska","Arizona","Arkansas",
             states.add(stateList[i]);
         }
 
-class Item 
-{
+class Item {
     private int id=0;
     private String name=null;
     private float amount_price=0f;
@@ -69,33 +68,43 @@ try
     stmt =conn.createStatement();
     stmt_2 =conn.createStatement();
     stmt_3 =conn.createStatement();
-    /**SQL_1 for (state, amount)**/
     
+    String SQL_prod_all="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s "+
+         "where s.pid=p.id "+
+         "group by p.name,p.id "+
+         "order by p.name asc "+
+         "limit 10;";
     
-    String SQL_1="select p.id, p.name, sum(c.quantity*p.price) as amount from products p, sales c "+
-                 "where c.pid=p.id "+
-                 "group by p.name,p.id "+
-                 "order by  p.name asc "+
-                 "limit 10;";
-    		
-    String SQL_cust="select  u.name, sum(c.quantity*p.price) as amount from users u, sales c,  products p "+
-            "where c.uid=u.id and c.pid=p.id "+ 
+    String SQL_prod_cat="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s, categories c "+
+             "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
+             " group by p.name,p.id "+
+             "order by p.name asc "+
+             "limit 10;";         
+         
+    String SQL_cust="select  u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+            "where s.uid=u.id and s.pid=p.id "+ 
             "group by u.name "+ 
             "order by u.name asc "+
             "limit 20;";
 
-    String SQL_state="select  u.state, sum(c.quantity*p.price) as amount from users u, sales c,  products p "+
-                  "where c.uid=u.id and c.pid=p.id "+ 
+    String SQL_state="select  u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
+                  "where s.uid=u.id and s.pid=p.id "+ 
                   "group by u.state "+ 
                   "order by u.state asc "+
                   "limit 20;";
-
-    rs=stmt.executeQuery(SQL_1);
+    
+//     product category filter
+    if (category.equals("all")) {
+    	rs = stmt.executeQuery(SQL_prod_all);
+    }
+    else {
+    	rs = stmt.executeQuery(SQL_prod_cat);
+    }
+    
     int p_id=0;
     String p_name=null;
     float p_amount_price=0;
-    while(rs.next())
-    {
+    while(rs.next()) {
         p_id=rs.getInt(1);
         p_name=rs.getString(2);
         p_amount_price=rs.getFloat(3);
@@ -107,39 +116,27 @@ try
     
     }
     
-    String s_name=null;
-    float s_amount_price=0;
+//     row option
     if("customers".equals(option) || "".equals(option)) {
     	rs_2=stmt_2.executeQuery(SQL_cust);
-        while(rs_2.next())
-        {
-            s_name=rs_2.getString(1);
-            s_amount_price=rs_2.getFloat(2);
-            item=new Item();
-            item.setName(s_name);
-            item.setAmount_price(s_amount_price);
-            s_list.add(item);
-        }
     }
     else if("states".equals(option)) {
 	    rs_2=stmt_2.executeQuery(SQL_state);
-	    while(rs_2.next())
-	    {
-	        s_name=rs_2.getString(1);
-	        s_amount_price=rs_2.getFloat(2);
-	        item=new Item();
-	        item.setName(s_name);
-	        item.setAmount_price(s_amount_price);
-	        s_list.add(item);
-	    }   
+    }
+    String s_name=null;
+    float s_amount_price=0;
+    while(rs_2.next()) {
+	    s_name=rs_2.getString(1);
+	    s_amount_price=rs_2.getFloat(2);
+	    item=new Item();
+	    item.setName(s_name);
+	    item.setAmount_price(s_amount_price);
+	    s_list.add(item);
     }
     
-    
-//    out.println("product #:"+p_list.size()+"<br>state #:"+s_list.size()+"<p>");
     int i=0,j=0;
-    String SQL_3="";    
-    float amount=0;
-%>
+    String SQL_3="";  
+    float amount=0; %>
 
 <form action="analytics.jsp" method="POST">
     Sort rows by: 
@@ -149,24 +146,21 @@ try
     </select><p/>
     Filter sales by:
     <select name="state">
-        <option value="all">All States</option>
-    <% for (i = 0; i < 50; i++) { %>
-        <option value="<%=stateList[i]%>"><%=stateList[i]%></option>
-    <% } %>
-    </select>
-    <%
+        <option value="all">All States</option> <% 
+        for (i = 0; i < 50; i++) { %>
+        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } %>
+    </select>    <%
+    
     Statement stmtCategory = conn.createStatement();
     ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
     ArrayList<String> categoryDrop = new ArrayList<String>();
     while (rsCategory.next()) {
-        categoryDrop.add(rsCategory.getString("name"));
-    } 
-    %>
+        categoryDrop.add(rsCategory.getString("name")); } %>
+    
     <select name="category">
         <option value="all">All Categories</option>
         <% for (j = 0; j < categoryDrop.size(); j++) { %>
-        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option>
-        <% } %>    
+        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } %>    
     </select>
     <select name="age">
         <option value="all">All Ages</option>
@@ -177,12 +171,13 @@ try
     </select>
     <button type="submit">Run Query</button>
 </form>
+<%=option %> <br>
+<%=category %>
     <table align="center" width="98%" border="1">
         <tr align="center">
             <td><strong><font color="#FF0000">STATE</font></strong></td>
 <%  
-    for(i=0;i<p_list.size();i++)
-    {
+    for(i=0;i<p_list.size();i++) {
         p_id            =   p_list.get(i).getId();
         p_name          =   p_list.get(i).getName();
         p_amount_price  =   p_list.get(i).getAmount_price();
@@ -191,14 +186,12 @@ try
 %>
         </tr>
 <%  
-    for(i=0;i<s_list.size();i++)
-    {
+    for(i=0;i<s_list.size();i++) {
         s_name          =   s_list.get(i).getName();
         s_amount_price  =   s_list.get(i).getAmount_price();
         out.println("<tr  align=\"center\">");
         out.println("<td><strong>"+s_name+"["+s_amount_price+"]</strong></td>");
-        for(j=0;j<p_list.size();j++)
-        {
+        for(j=0;j<p_list.size();j++) {
             p_id            =   p_list.get(j).getId();
             p_name          =   p_list.get(j).getName();
             p_amount_price  =   p_list.get(j).getAmount_price();
@@ -214,13 +207,11 @@ try
             else if ("states".equals(option)) {
                 rs_3=stmt_3.executeQuery(SQL_state2);	
             }
-            if(rs_3.next())
-            {
+            if(rs_3.next()) {
                 amount=rs_3.getFloat(1);
                 out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
             }
-            else
-            {
+            else {
                out.println("<td><font color='#ff0000'>0</font></td>");
             }
 
@@ -230,19 +221,19 @@ try
     
     session.setAttribute("TOP_10_Products",p_list);
 %>
-        <tr><td colspan="10"><input type="button" value="Next 20 States"></td></tr>
+        <form action="analytics.jsp" method="POST">
+        <tr> <% if (option.equals("states")) { %>
+        <td colspan="10"><input type="button" value="Next 20 States"> <% } else { %>
+        <td colspan="10"><input type="button" value="Next 20 Customers"> <% } %>
+        <input type="button" value="Next 10 Products"></tr>
+        </form>
     </table>
 <%
 }
-catch(Exception e)
-{
-    //out.println("<font color='#ff0000'>Error.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
-  out.println(e.getMessage());
-}
-finally
-{
-    conn.close();
-}   
+catch(Exception e) { 
+	out.println(e.getMessage()); }
+finally {
+	conn.close(); }   
 %>  
 </body>
 </html>
