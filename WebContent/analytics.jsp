@@ -8,13 +8,27 @@
 <body>
 <%
 
-String option=null, state=null, category=null, age=null;
-try { option = request.getParameter("option");} catch(Exception e){option = "";}
-try { state = request.getParameter("state");} catch(Exception e){state = "";}
-try { category = request.getParameter("category");} catch(Exception e){category = "";}
-try { age = request.getParameter("age");} catch(Exception e){age = "";}  
+// String option="customers", state="all", category="category", age="all";
 
-String stateList[] = {"Alabama","Alaska","Arizona","Arkansas",
+String option = (String)request.getParameter("option");
+String state = (String)request.getParameter("state");
+String category = (String)request.getParameter("category");
+String age = (String)request.getParameter("age");
+
+if (option == null) {
+    option = "customers";
+}
+if (state == null) {
+    state = "all";
+}
+if (category == null) {
+    category = "all";
+}
+if (age == null) {
+    age = "all";
+}
+
+String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
            "California","Colorado","Connecticut","Delaware","Florida","Georgia",
            "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
            "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
@@ -190,43 +204,58 @@ try
     String SQL_3="";  
     float amount=0; %>
 
+<table>
 <form action="analytics.jsp" method="POST">
-    Sort rows by: 
-    <select name="option">
-        <option value="customers">Customers</option>
-        <option value="states">States</option>
-    </select><p/>
-    Filter sales by:
-    <select name="state">
-        <option value="all">All States</option> <% 
-        for (i = 0; i < 50; i++) { %>
-        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } %>
-    </select>    <%
+    <tr><td>Sort rows by:</td> 
+    <td><select name="option">
+        <option value="<%=option %>"><%=option %></option> <%
+        if (option.equals("customers")) { %>
+            <option value="states">states</option> <%
+        } 
+        else { %>
+            <option value="customers">customers</option> <%	
+        }
+        %>
+        
+    </select></td></tr>
+    <tr><td>Filter sales by:</td></tr>
+    <tr><td>State:</td> <td><select name="state">
+        <option value="<%=state %>"><%=state %></option> <%
+        for (i = 0; i < 50; i++) { 
+            if (!stateList[i].equals(state)) { %>
+        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } } %>
+    </select> </td></tr>    <%
     
     Statement stmtCategory = conn.createStatement();
     ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
     ArrayList<String> categoryDrop = new ArrayList<String>();
+    categoryDrop.add("all");
     while (rsCategory.next()) {
-        categoryDrop.add(rsCategory.getString("name")); } %>
+        categoryDrop.add(rsCategory.getString("name")); }  %>
     
-    <select name="category">
-        <option value="all">All Categories</option>
-        <% for (j = 0; j < categoryDrop.size(); j++) { %>
-        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } %>    
-    </select>
-    <select name="age">
-        <option value="all">All Ages</option>
-        <option value="12 and 18">12-18</option>
-        <option value="19 and 45">19-45</option>
-        <option value="46 and 65">46-65</option>
-        <option value="65 and 1000">65+</option>
-    </select>
-    <button type="submit">Run Query</button>
-</form>
-<%=option %> <br>
-<%=category %> <br>
-<%=age %> <br>
-<%=state %>  <br>
+    <tr><td>Category:</td><td> <select name="category">
+        <option value="<%=category %>"><%=category %></option>
+        <% for (j = 0; j < categoryDrop.size(); j++) { 
+           if (!categoryDrop.get(j).equals(category)) { %>
+        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } } %>    
+    </select> </td></tr>
+    
+    <% ArrayList<String> ageDrop = new ArrayList<String>();
+    ageDrop.add("all");
+    ageDrop.add("12 and 18");
+    ageDrop.add("18 and 45");
+    ageDrop.add("45 and 65"); 
+    ageDrop.add("65 and 1000"); %>
+    <tr><td>Age:</td><td> <select name="age"> 
+        <option value="<%=age%>"><%=age %></option> <% 
+         for (j = 0; j < ageDrop.size(); j++) { 
+           if (!ageDrop.get(j).equals(age)) { %>
+        <option value="<%= ageDrop.get(j)%>"><%= ageDrop.get(j)%></option> <% } } %>
+    </select> </td>
+    <tr><td><button type="submit">Run Query</button></td></tr>
+    </form>
+</table>
+
     <table align="center" width="98%" border="1">
         <tr align="center"> <%
         if (option.equals("states")) { %>
@@ -238,7 +267,7 @@ try
         p_id            =   p_list.get(i).getId();
         p_name          =   p_list.get(i).getName();
         p_amount_price  =   p_list.get(i).getAmount_price();
-        out.print("<td> <strong>"+p_name+"<br>["+p_amount_price+"]</strong></td>");
+        out.print("<td> <strong>"+p_name+"<br>("+p_amount_price+")</strong></td>");
     }
 %>
         </tr>
@@ -247,7 +276,7 @@ try
         s_name          =   s_list.get(i).getName();
         s_amount_price  =   s_list.get(i).getAmount_price();
         out.println("<tr  align=\"center\">");
-        out.println("<td><strong>"+s_name+"["+s_amount_price+"]</strong></td>");
+        out.println("<td><strong>"+s_name+"("+s_amount_price+")</strong></td>");
         for(j=0;j<p_list.size();j++) {
             p_id            =   p_list.get(j).getId();
             p_name          =   p_list.get(j).getName();
@@ -278,11 +307,15 @@ try
     
     session.setAttribute("TOP_10_Products",p_list);
 %>
-        <form action="analytics.jsp" method="POST">
+        <form action="analytics.jsp" method="GET">
         <tr> <% if (option.equals("states")) { %>
         <td colspan="10"><input type="button" value="Next 20 States"> <% } else { %>
         <td colspan="10"><input type="button" value="Next 20 Customers"> <% } %>
-        <input type="button" value="Next 10 Products"></tr>
+        <input type="hidden" name="age" value="<%=age %>"/>
+        <input type="hidden" name="state" value="<%=state %>"/>
+        <input type="hidden" name="category" value="<%=category %>"/>
+        <input type="hidden" name="option" value="<%=option %>"/>
+        <button type="submit">Next 10 Products</button></tr>
         </form>
     </table>
 <%

@@ -33,51 +33,40 @@ if(("Y").equals(need_to_connect_db))
 				session.setAttribute("name",name);
 				session.setAttribute("userID",userID);
 				session.setAttribute("role",role);
-				if(role.equals("owner"))
-				{		
+				if(role.equals("owner")) {		
 					role_flag=1;
 				}
-				else
-				{
+				else {
 					role_flag=2;
 				}
 				t++;
 			}
-			if(t==0)
-			{
+			if(t==0) {
 				role_flag=0;
 			}
 		}
-		catch(Exception e)
-		{
+		catch(Exception e)	{
 				out.println("<font color='#ff0000'>Error, can not access the database, please check the database connection.<br><a href=\"login.jsp\" target=\"_self\"><i>Go Back to Home Page.</i></a></font><br>");
 				//e.printStackTrace(response.getWriter());
 		}
-		finally
-		{
+		finally {
 			conn.close();
 		}
 }
-else
-{
-	if(flag!=-1)
-	{
-		if(session.getAttribute("name")!=null)
-		{
+else {
+	if(flag!=-1) {
+		if(session.getAttribute("name")!=null) 	{
 			name=(String)session.getAttribute("name");
 			String role=(String)session.getAttribute("role");
-			if(role.equals("owner"))
-			{		
+			if(role.equals("owner")) {		
 				role_flag=1;
 			}
-			else
-			{
+			else {
 				role_flag=2;
 			}
 		}
 	}
 }
-
 %>
 
 
@@ -94,27 +83,20 @@ else
 		<td colspan="2"><font size="+2" color="#0000FF">Demo for CSE135 project 1</font></td>
 	</tr>
 <%
-	if(role_flag==-1 || role_flag==0)
-	{
+	if(role_flag==-1 || role_flag==0) {
 		out.println("<tr  align=\"center\"><td width=\"100px\" align=\"right\"><font size=\"+1\">Name:</font></td><td width=\"400px\" align=\"left\"><input type=\"text\" name=\"name\" id=\"name\" style=\"width:300; height:30; font-size:22\"></td></tr>");
-	
 	}
-	if(role_flag==0)
-	{
+	if(role_flag==0) {
 		out.print("<tr align=\"center\"><td colspan=\"2\">The provided name <font color=\"#FF0000\">\""+name+"\"</font> is not known.<br>Please <a href=\"signup.jsp\" target=\"_self\">sign up</a> first!</td></tr>");	
-	
 	}
-	if(role_flag==-1 || role_flag==0)
-	{
+	if(role_flag==-1 || role_flag==0) {
 	   out.print("<tr align=\"center\"><td colspan=\"2\"><input type=\"submit\" value=\"Please Login\" style=\"width:150; height:30; font-size:20px\" ></td></tr>");
 	}
-	
-	if(role_flag==1)
-	{
+	if(role_flag==1) {
 	    out.print("<tr align=\"center\"><td colspan=\"2\"><font color=\"#FF0000\">Welcome owner \""+name+"\"</font><br>");
 		out.print("<a href=\"categories.jsp\">Manage Categories</a><br>");
 		out.print("<a href=\"products.jsp\">Manage Products</a><br>");
-		out.print("<a href=\"analytics.jsp\">Sales Analytics</a><br>");
+		out.print("<a href=\"analytics.jsp?option=customers&state=all&category=all&age=all\">Sales Analytics</a><br>");
 		out.print("<a href=\"login.jsp?flag=-1\"> Change an account</a><br>");
 		out.print("</td></tr>");
 	}
