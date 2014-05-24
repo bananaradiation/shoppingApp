@@ -64,7 +64,7 @@ public class DataGenerator
 		String[] nameList={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 		Random r=new Random();
 		int flag=0;
-		SQLs.add("INSERT INTO users (name, role, age, state) VALUES('CSE','owner',35,'california');");
+		SQLs.add("INSERT INTO users (name, role, age, state) VALUES('CSE','owner',35,'California');");
 		while(flag<Num_users)
 		{
 			age=r.nextInt(88)+12;

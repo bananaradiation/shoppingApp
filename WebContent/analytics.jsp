@@ -1,28 +1,21 @@
-<%@ page contentType="text/html; charset=utf-8" language="java" import="java.sql.*" import="database.*"   import="java.util.*" errorPage="" %>
+<%@ page contentType="text/html; charset=utf-8" language="java"
+	import="java.sql.*" import="database.*" import="java.util.*"
+	errorPage=""%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>CSE135</title>
 <script type="text/javascript" src="js/js.js" language="javascript"></script>
 </head>
-<body>
-<%
+<body> <%
 
-// long startTime = System.currentTimeMillis();
-// long finishTime = System.currentTimeMillis();
-// System.out.println("Time for query: " + (finishTime-startTime) + "ms");
-
+// Parameter passing
 String option = (String)request.getParameter("option");
 String state = (String)request.getParameter("state");
 String category = (String)request.getParameter("category");
 String age = (String)request.getParameter("age");
-
 String rowPg = (String)request.getParameter("rowPage");
 String colPg = (String)request.getParameter("colPage");
-
-int state_rows = 20;
-int state_limit = 20;
-
 if (option == null) {
     option = "customers";
 }
@@ -51,10 +44,10 @@ String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
            "Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
            "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
            "Virginia","Washington","West Virginia","Wisconsin","Wyoming"};
-        ArrayList<String> states = new ArrayList<String>();
-        for (int i = 0; i < 50; i++) {
-            states.add(stateList[i]);
-        }
+ArrayList<String> states = new ArrayList<String>();
+for (int i = 0; i < 50; i++) {
+    states.add(stateList[i]);
+}
 
 class Item {
     private int id=0;
@@ -129,15 +122,13 @@ try
             " group by u.name "+ 
             "order by u.name asc "+
             "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-
-            
+     
     //  state option
     String SQL_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
             "where s.uid=u.id and s.pid=p.id "+ 
             "group by u.state "+ 
             "order by u.state asc "+
-            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-    
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";    
     String SQL_state_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
             " group by u.state "+ 
@@ -251,28 +242,40 @@ else if (Integer.parseInt(colPg) != 1) {
 	showDashboard = false;
 } 
 if (showDashboard) { %>
-
 	<table>
-	<form action="analytics.jsp" method="POST">
-	    <tr><td>Sort rows by:</td> 
-	    <td><select name="option">
-	        <option value="<%=option %>"><%=option %></option> <%
+		<form action="analytics.jsp" method="POST">
+			<tr>
+				<td>Sort rows by:</td>
+				<td><select name="option">
+						<option value="<%=option %>"><%=option %></option>
+						<%
 	        if (option.equals("customers")) { %>
-	            <option value="states">states</option> <%
+						<option value="states">states</option>
+						<%
 	        } 
 	        else { %>
-	            <option value="customers">customers</option> <%	
+						<option value="customers">customers</option>
+						<%	
 	        }
 	        %>
-	        
-	    </select></td></tr>
-	    <tr><td>Filter sales by:</td></tr>
-	    <tr><td>State:</td> <td><select name="state">
-	        <option value="<%=state %>"><%=state %></option> <%
+
+				</select></td>
+			</tr>
+		<tr>
+			<td>Filter sales by:</td>
+		</tr>
+		<tr>
+			<td>State:</td>
+			<td><select name="state">
+					<option value="<%=state %>"><%=state %></option>
+					<%
 	        for (i = 0; i < 50; i++) { 
 	            if (!stateList[i].equals(state)) { %>
-	        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } } %>
-	    </select> </td></tr>    <%
+					<option value="<%=stateList[i]%>"><%=stateList[i]%></option>
+					<% } } %>
+			</select></td>
+		</tr>
+		<%
 	    
 	    Statement stmtCategory = conn.createStatement();
 	    ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
@@ -280,37 +283,51 @@ if (showDashboard) { %>
 	    categoryDrop.add("all");
 	    while (rsCategory.next()) {
 	        categoryDrop.add(rsCategory.getString("name")); }  %>
-	    
-	    <tr><td>Category:</td><td> <select name="category">
-	        <option value="<%=category %>"><%=category %></option>
-	        <% for (j = 0; j < categoryDrop.size(); j++) { 
+
+		<tr>
+			<td>Category:</td>
+			<td><select name="category">
+					<option value="<%=category %>"><%=category %></option>
+					<% for (j = 0; j < categoryDrop.size(); j++) { 
 	           if (!categoryDrop.get(j).equals(category)) { %>
-	        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } } %>    
-	    </select> </td></tr>
-	    
-	    <% ArrayList<String> ageDrop = new ArrayList<String>();
+					<option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option>
+					<% } } %>
+			</select></td>
+		</tr>
+
+		<% ArrayList<String> ageDrop = new ArrayList<String>();
 	    ageDrop.add("all");
 	    ageDrop.add("12 and 18");
 	    ageDrop.add("18 and 45");
 	    ageDrop.add("45 and 65"); 
 	    ageDrop.add("65 and 1000"); %>
-	    <tr><td>Age:</td><td> <select name="age"> 
-	        <option value="<%=age%>"><%=age %></option> <% 
+		<tr>
+			<td>Age:</td>
+			<td><select name="age">
+					<option value="<%=age%>"><%=age %></option>
+					<% 
 	         for (j = 0; j < ageDrop.size(); j++) { 
 	           if (!ageDrop.get(j).equals(age)) { %>
-	        <option value="<%= ageDrop.get(j)%>"><%= ageDrop.get(j)%></option> <% } } %>
-	    </select> </td>
-	    <tr><td><button type="submit">Run Query</button></td></tr>
-	    </form>
-	</table> <%
+					<option value="<%= ageDrop.get(j)%>"><%= ageDrop.get(j)%></option>
+					<% } } %>
+			</select></td>
+		<tr>
+			<td><button type="submit">Run Query</button></td>
+		</tr>
+		</form>
+	</table>
+	<%
 } %>
 
-    <table align="center" width="98%" border="1">
-        <tr align="center"> <%
+	<table align="center" width="98%" border="1">
+		<tr align="center">
+			<%
         if (option.equals("states")) { %>
-            <td><strong><font color="#FF0000">STATE</font></strong></td>  <% }
+			<td><strong><font color="#FF0000">STATE</font></strong></td>
+			<% }
         else if (option.equals("customers")) { %>
-            <td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>  <% }
+			<td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>
+			<% }
     
     for(i=0;i<p_list.size();i++) {
         p_id            =   p_list.get(i).getId();
@@ -319,8 +336,8 @@ if (showDashboard) { %>
         out.print("<td> <strong>"+p_name+"<br>("+p_amount_price+")</strong></td>");
     }
 %>
-        </tr>
-<%  
+		</tr>
+		<%  
 
     long startTime = System.currentTimeMillis();
     for(i=0;i<s_list.size();i++) {
@@ -356,49 +373,56 @@ if (showDashboard) { %>
         out.println("</tr>");
     }
     long finishTime = System.currentTimeMillis();
-    System.out.println("Time for query: " + (finishTime-startTime) + "ms line 359");    
-    
-%>
-    <form action="analytics.jsp" method="GET">
-	     <tr>
-	     <td align="center"> <% 
+    System.out.println("Time for query: " + (finishTime-startTime) + "ms line 359"); %>
+		<form action="analytics.jsp" method="GET">
+			<tr>
+				<td align="center">
+					<% 
 	     if (s_list.size() >= 20) {
 	         if (option.equals("states")) { %>
-	      <button type="submit" align="center">Next 20 States</button> <% } 
+					<button type="submit" align="center">Next 20 States</button> <% } 
 	         else { %>
-	      <button type="submit">Next 20 Customers</button> <%
+					<button type="submit">Next 20 Customers</button> <%
 	         }
-	     } %>
-	     <input type="hidden" name="rowPage" value="<%=Integer.parseInt(rowPg)+1 %>"/>
-         <input type="hidden" name="colPage" value="<%=Integer.parseInt(colPg) %>"/>
-	     <input type="hidden" name="age" value="<%=age %>"/>
-	     <input type="hidden" name="state" value="<%=state %>"/>
-	     <input type="hidden" name="category" value="<%=category %>"/>
-	     <input type="hidden" name="option" value="<%=option %>"/>
-	     </td>
-    </form>
-    <form action="analytics.jsp" method="GET">
-	     <tr>
-	     <td align="center"> <% 
+	     } %> <input type="hidden" name="rowPage"
+					value="<%=Integer.parseInt(rowPg)+1 %>" /> <input type="hidden"
+					name="colPage" value="<%=Integer.parseInt(colPg) %>" /> <input
+					type="hidden" name="age" value="<%=age %>" /> <input type="hidden"
+					name="state" value="<%=state %>" /> <input type="hidden"
+					name="category" value="<%=category %>" /> <input type="hidden"
+					name="option" value="<%=option %>" />
+				</td>
+		</form>
+		<form action="analytics.jsp" method="GET">
+			<tr>
+				<td align="center">
+					<% 
 	     if (p_list.size() >= 10) { %>
-	         <button type="submit">Next 10 Products</button></tr> <%
+					<button type="submit">Next 10 Products</button>
+			</tr>
+			<%
 	     } %>
-	     <input type="hidden" name="colPage" value="<%=Integer.parseInt(colPg)+1 %>"/>
-         <input type="hidden" name="rowPage" value="<%=Integer.parseInt(rowPg) %>"/>
-	     <input type="hidden" name="age" value="<%=age %>"/>
-	     <input type="hidden" name="state" value="<%=state %>"/>
-	     <input type="hidden" name="category" value="<%=category %>"/>
-	     <input type="hidden" name="option" value="<%=option %>"/>
-	     </td>
-    </form>
-</table>
-<%
+			<input type="hidden" name="colPage"
+				value="<%=Integer.parseInt(colPg)+1 %>" /> <input type="hidden"
+				name="rowPage" value="<%=Integer.parseInt(rowPg) %>" /> <input
+				type="hidden" name="age" value="<%=age %>" /> <input type="hidden"
+				name="state" value="<%=state %>" /> <input type="hidden"
+				name="category" value="<%=category %>" /> <input type="hidden"
+				name="option" value="<%=option %>" />
+			</td>
+		</form>
+		<form action="analytics.jsp" method="GET">
+            <tr><td align="center">
+            <button type="submit">Analytics Home</button></td></tr>
+        </form>
+	</table>
+	<%
 }
 catch(Exception e) { 
 	out.println(e.getMessage()); }
 finally {
 	System.out.println("End query");
 	conn.close(); }   
-%>  
+%>
 </body>
 </html>
