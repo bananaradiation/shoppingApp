@@ -8,12 +8,20 @@
 <body>
 <%
 
-// String option="customers", state="all", category="category", age="all";
+// long startTime = System.currentTimeMillis();
+// long finishTime = System.currentTimeMillis();
+// System.out.println("Time for query: " + (finishTime-startTime) + "ms");
 
 String option = (String)request.getParameter("option");
 String state = (String)request.getParameter("state");
 String category = (String)request.getParameter("category");
 String age = (String)request.getParameter("age");
+
+String rowPg = (String)request.getParameter("rowPage");
+String colPg = (String)request.getParameter("colPage");
+
+int state_rows = 20;
+int state_limit = 20;
 
 if (option == null) {
     option = "customers";
@@ -26,6 +34,12 @@ if (category == null) {
 }
 if (age == null) {
     age = "all";
+}
+if (rowPg == null) {
+    rowPg = "1";
+}
+if (colPg == null) {
+    colPg = "1";
 }
 
 String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
@@ -87,55 +101,59 @@ try
          "where s.pid=p.id "+
          "group by p.name,p.id "+
          "order by p.name asc "+
-         "limit 10;";    
+         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*20+";";
     String SQL_prod_cat="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s, categories c "+
-             "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
-             " group by p.name,p.id "+
-             "order by p.name asc "+
-             "limit 10;";
+         "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
+         " group by p.name,p.id "+
+         "order by p.name asc "+
+         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*20+";";
              
 //  customer option
     String SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id "+ 
             "group by u.name "+ 
             "order by u.name asc "+
-            "limit 20;";    
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
     String SQL_cust_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age+ 
             " group by u.name "+ 
             "order by u.name asc "+
-            "limit 20;";
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
     String SQL_cust_age="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
             " group by u.name "+ 
             "order by u.name asc "+
-            "limit 20;";    
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
     String SQL_cust_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
             " group by u.name "+ 
             "order by u.name asc "+
-            "limit 20;";
-//  state option
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+
+            
+    //  state option
     String SQL_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
-                  "where s.uid=u.id and s.pid=p.id "+ 
-                  "group by u.state "+ 
-                  "order by u.state asc "+
-                  "limit 20;";
+            "where s.uid=u.id and s.pid=p.id "+ 
+            "group by u.state "+ 
+            "order by u.state asc "+
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+    
     String SQL_state_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
             "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
             " group by u.state "+ 
             "order by u.state asc "+
-            "limit 20;";
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
     String SQL_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
             "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
             " group by u.state "+ 
             "order by u.state asc "+
-            "limit 20;";
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
     String SQL_state_age_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
             "where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ 
             " group by u.state "+ 
             "order by u.state asc "+
-            "limit 20;";
+            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+            
 //     product category filter
     if (category.equals("all")) {
     	rs = stmt.executeQuery(SQL_prod_all);
@@ -156,39 +174,61 @@ try
         item.setName(p_name);
         item.setAmount_price(p_amount_price);
         p_list.add(item);
-    
     }
     
 //  row options
     if(option.equals("customers") || option.equals("")) {
     	if (!age.equals("all") && !state.equals("all")) {
-    		rs_2=stmt_2.executeQuery(SQL_cust_age_state);
+    		long startTime = System.currentTimeMillis();
+            rs_2=stmt_2.executeQuery(SQL_cust_age_state);
+    		long finishTime = System.currentTimeMillis();
+    		System.out.println("Time for query: " + (finishTime-startTime) + "ms lin 188");
     	}
     	else if (!age.equals("all")) {
+    		long startTime = System.currentTimeMillis();
     		rs_2=stmt_2.executeQuery(SQL_cust_age);
+    		long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms lin 194");
     	}
     	else if (!state.equals("all")) {
+    		long startTime = System.currentTimeMillis();            
     		rs_2=stmt_2.executeQuery(SQL_cust_state);
+    		long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 200");
     	}
     	else {
-    		rs_2=stmt_2.executeQuery(SQL_cust);
+    		long startTime = System.currentTimeMillis();   		
+            rs_2=stmt_2.executeQuery(SQL_cust);
+            long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 206");
     	}
     }
     else if(option.equals("states")) {
     	if (!age.equals("all") && !state.equals("all")) {
+            long startTime = System.currentTimeMillis();    		
             rs_2=stmt_2.executeQuery(SQL_state_age_state);
+            long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 214");
         }
         else if (!age.equals("all")) {
+            long startTime = System.currentTimeMillis();
             rs_2=stmt_2.executeQuery(SQL_state_age);
+            long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 220");
         }
         else if (!state.equals("all")) {
+            long startTime = System.currentTimeMillis();
             rs_2=stmt_2.executeQuery(SQL_state_state);
+            long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 226");
         }
         else {
+            long startTime = System.currentTimeMillis();
             rs_2=stmt_2.executeQuery(SQL_state);
+            long finishTime = System.currentTimeMillis();
+            System.out.println("Time for query: " + (finishTime-startTime) + "ms line 232");
         }
     }
-
     String s_name=null;
     float s_amount_price=0;
     while(rs_2.next()) {
@@ -202,59 +242,68 @@ try
     
     int i=0,j=0;
     String SQL_3="";  
-    float amount=0; %>
+    float amount=0; 
+boolean showDashboard = true;
+if (Integer.parseInt(rowPg) != 1) {
+	showDashboard = false;	
+}
+else if (Integer.parseInt(colPg) != 1) {
+	showDashboard = false;
+} 
+if (showDashboard) { %>
 
-<table>
-<form action="analytics.jsp" method="POST">
-    <tr><td>Sort rows by:</td> 
-    <td><select name="option">
-        <option value="<%=option %>"><%=option %></option> <%
-        if (option.equals("customers")) { %>
-            <option value="states">states</option> <%
-        } 
-        else { %>
-            <option value="customers">customers</option> <%	
-        }
-        %>
-        
-    </select></td></tr>
-    <tr><td>Filter sales by:</td></tr>
-    <tr><td>State:</td> <td><select name="state">
-        <option value="<%=state %>"><%=state %></option> <%
-        for (i = 0; i < 50; i++) { 
-            if (!stateList[i].equals(state)) { %>
-        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } } %>
-    </select> </td></tr>    <%
-    
-    Statement stmtCategory = conn.createStatement();
-    ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
-    ArrayList<String> categoryDrop = new ArrayList<String>();
-    categoryDrop.add("all");
-    while (rsCategory.next()) {
-        categoryDrop.add(rsCategory.getString("name")); }  %>
-    
-    <tr><td>Category:</td><td> <select name="category">
-        <option value="<%=category %>"><%=category %></option>
-        <% for (j = 0; j < categoryDrop.size(); j++) { 
-           if (!categoryDrop.get(j).equals(category)) { %>
-        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } } %>    
-    </select> </td></tr>
-    
-    <% ArrayList<String> ageDrop = new ArrayList<String>();
-    ageDrop.add("all");
-    ageDrop.add("12 and 18");
-    ageDrop.add("18 and 45");
-    ageDrop.add("45 and 65"); 
-    ageDrop.add("65 and 1000"); %>
-    <tr><td>Age:</td><td> <select name="age"> 
-        <option value="<%=age%>"><%=age %></option> <% 
-         for (j = 0; j < ageDrop.size(); j++) { 
-           if (!ageDrop.get(j).equals(age)) { %>
-        <option value="<%= ageDrop.get(j)%>"><%= ageDrop.get(j)%></option> <% } } %>
-    </select> </td>
-    <tr><td><button type="submit">Run Query</button></td></tr>
-    </form>
-</table>
+	<table>
+	<form action="analytics.jsp" method="POST">
+	    <tr><td>Sort rows by:</td> 
+	    <td><select name="option">
+	        <option value="<%=option %>"><%=option %></option> <%
+	        if (option.equals("customers")) { %>
+	            <option value="states">states</option> <%
+	        } 
+	        else { %>
+	            <option value="customers">customers</option> <%	
+	        }
+	        %>
+	        
+	    </select></td></tr>
+	    <tr><td>Filter sales by:</td></tr>
+	    <tr><td>State:</td> <td><select name="state">
+	        <option value="<%=state %>"><%=state %></option> <%
+	        for (i = 0; i < 50; i++) { 
+	            if (!stateList[i].equals(state)) { %>
+	        <option value="<%=stateList[i]%>"><%=stateList[i]%></option> <% } } %>
+	    </select> </td></tr>    <%
+	    
+	    Statement stmtCategory = conn.createStatement();
+	    ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
+	    ArrayList<String> categoryDrop = new ArrayList<String>();
+	    categoryDrop.add("all");
+	    while (rsCategory.next()) {
+	        categoryDrop.add(rsCategory.getString("name")); }  %>
+	    
+	    <tr><td>Category:</td><td> <select name="category">
+	        <option value="<%=category %>"><%=category %></option>
+	        <% for (j = 0; j < categoryDrop.size(); j++) { 
+	           if (!categoryDrop.get(j).equals(category)) { %>
+	        <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option> <% } } %>    
+	    </select> </td></tr>
+	    
+	    <% ArrayList<String> ageDrop = new ArrayList<String>();
+	    ageDrop.add("all");
+	    ageDrop.add("12 and 18");
+	    ageDrop.add("18 and 45");
+	    ageDrop.add("45 and 65"); 
+	    ageDrop.add("65 and 1000"); %>
+	    <tr><td>Age:</td><td> <select name="age"> 
+	        <option value="<%=age%>"><%=age %></option> <% 
+	         for (j = 0; j < ageDrop.size(); j++) { 
+	           if (!ageDrop.get(j).equals(age)) { %>
+	        <option value="<%= ageDrop.get(j)%>"><%= ageDrop.get(j)%></option> <% } } %>
+	    </select> </td>
+	    <tr><td><button type="submit">Run Query</button></td></tr>
+	    </form>
+	</table> <%
+} %>
 
     <table align="center" width="98%" border="1">
         <tr align="center"> <%
@@ -272,26 +321,29 @@ try
 %>
         </tr>
 <%  
+
+    long startTime = System.currentTimeMillis();
     for(i=0;i<s_list.size();i++) {
         s_name          =   s_list.get(i).getName();
         s_amount_price  =   s_list.get(i).getAmount_price();
         out.println("<tr  align=\"center\">");
-        out.println("<td><strong>"+s_name+"("+s_amount_price+")</strong></td>");
-        for(j=0;j<p_list.size();j++) {
-            p_id            =   p_list.get(j).getId();
-            p_name          =   p_list.get(j).getName();
-            p_amount_price  =   p_list.get(j).getAmount_price();
-            
-            String SQL_state2="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
-                 "where c.uid=u.id and c.pid=p.id and u.state='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
-            String SQL_cust2="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
-                    "where c.uid=u.id and c.pid=p.id and u.name='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
+        out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>"); 
 
+        for(j=0;j<p_list.size();j++) {    	
+	        p_id            =   p_list.get(j).getId();
+	        p_name          =   p_list.get(j).getName();
+	        p_amount_price  =   p_list.get(j).getAmount_price();
+        
+	        String SQL_state2="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
+	                "where c.uid=u.id and c.pid=p.id and u.state='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
+	        String SQL_cust2="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
+	                   "where c.uid=u.id and c.pid=p.id and u.name='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
+	           
             if("customers".equals(option) || "".equals(option)) {
-            	rs_3=stmt_3.executeQuery(SQL_cust2);
+               rs_3=stmt_3.executeQuery(SQL_cust2);
             }
             else if ("states".equals(option)) {
-                rs_3=stmt_3.executeQuery(SQL_state2);	
+               rs_3 = stmt_3.executeQuery(SQL_state2); 
             }
             if(rs_3.next()) {
                 amount=rs_3.getFloat(1);
@@ -300,29 +352,52 @@ try
             else {
                out.println("<td><font color='#ff0000'>0</font></td>");
             }
-
         }
         out.println("</tr>");
     }
+    long finishTime = System.currentTimeMillis();
+    System.out.println("Time for query: " + (finishTime-startTime) + "ms line 359");    
     
-    session.setAttribute("TOP_10_Products",p_list);
 %>
-        <form action="analytics.jsp" method="GET">
-        <tr> <% if (option.equals("states")) { %>
-        <td colspan="10"><input type="button" value="Next 20 States"> <% } else { %>
-        <td colspan="10"><input type="button" value="Next 20 Customers"> <% } %>
-        <input type="hidden" name="age" value="<%=age %>"/>
-        <input type="hidden" name="state" value="<%=state %>"/>
-        <input type="hidden" name="category" value="<%=category %>"/>
-        <input type="hidden" name="option" value="<%=option %>"/>
-        <button type="submit">Next 10 Products</button></tr>
-        </form>
-    </table>
+    <form action="analytics.jsp" method="GET">
+	     <tr>
+	     <td align="center"> <% 
+	     if (s_list.size() >= 20) {
+	         if (option.equals("states")) { %>
+	      <button type="submit" align="center">Next 20 States</button> <% } 
+	         else { %>
+	      <button type="submit">Next 20 Customers</button> <%
+	         }
+	     } %>
+	     <input type="hidden" name="rowPage" value="<%=Integer.parseInt(rowPg)+1 %>"/>
+         <input type="hidden" name="colPage" value="<%=Integer.parseInt(colPg) %>"/>
+	     <input type="hidden" name="age" value="<%=age %>"/>
+	     <input type="hidden" name="state" value="<%=state %>"/>
+	     <input type="hidden" name="category" value="<%=category %>"/>
+	     <input type="hidden" name="option" value="<%=option %>"/>
+	     </td>
+    </form>
+    <form action="analytics.jsp" method="GET">
+	     <tr>
+	     <td align="center"> <% 
+	     if (p_list.size() >= 10) { %>
+	         <button type="submit">Next 10 Products</button></tr> <%
+	     } %>
+	     <input type="hidden" name="colPage" value="<%=Integer.parseInt(colPg)+1 %>"/>
+         <input type="hidden" name="rowPage" value="<%=Integer.parseInt(rowPg) %>"/>
+	     <input type="hidden" name="age" value="<%=age %>"/>
+	     <input type="hidden" name="state" value="<%=state %>"/>
+	     <input type="hidden" name="category" value="<%=category %>"/>
+	     <input type="hidden" name="option" value="<%=option %>"/>
+	     </td>
+    </form>
+</table>
 <%
 }
 catch(Exception e) { 
 	out.println(e.getMessage()); }
 finally {
+	System.out.println("End query");
 	conn.close(); }   
 %>  
 </body>
