@@ -9,7 +9,6 @@ public class Database
 {
 	private Connection conn = null;
 	private Statement stmt=null;
-	
 	public boolean openConn() throws Exception
 	{
 	   try{
@@ -40,6 +39,28 @@ public class Database
 		dropCreateTable("DROP TABLE products CASCADE;","CREATE TABLE products (id SERIAL PRIMARY KEY,cid INTEGER REFERENCES categories (id) ON DELETE CASCADE,name TEXT NOT NULL,SKU TEXT NOT NULL UNIQUE,price INTEGER NOT NULL);");
 		dropCreateTable("DROP TABLE sales CASCADE;","CREATE TABLE sales (id SERIAL PRIMARY KEY,uid INTEGER REFERENCES users (id) ON DELETE CASCADE,pid INTEGER REFERENCES products (id) ON DELETE CASCADE,quantity INTEGER NOT NULL, price INTEGER NOT NULL);");
 		dropCreateTable("DROP TABLE carts CASCADE;","CREATE TABLE carts (id SERIAL PRIMARY KEY,uid INTEGER REFERENCES users (id) ON DELETE CASCADE,pid INTEGER REFERENCES products (id) ON DELETE CASCADE,quantity INTEGER NOT NULL, price INTEGER NOT NULL);");
+		
+		//tempory tables
+//		dropCreateTable("DROP TABLE u_t;","CREATE TABLE u_t (id int);");
+//		dropCreateTable("DROP TABLE p_t;","CREATE TABLE p_t (id int);");
+//		dropCreateTable("DROP TABLE us_t;","CREATE TABLE us_t (state text);");
+//		dropCreateTable("DROP TABLE ps_t;","CREATE TABLE ps_t (id int);");
+	}
+	public void copy(String usersPath,String categoriesPath,String productsPath, String salesPath) throws SQLException
+	{
+		System.out.println("==========================================================");
+		System.out.println("Inserting users data.....");
+		stmt.execute("COPY users(name,role,age,state) FROM '"+usersPath+"' USING DELIMITERS ',';");
+		System.out.println("Successfully inserting users data into database");
+		System.out.println("Inserting categories data.....");
+		stmt.execute("COPY categories (name,description) FROM '"+categoriesPath+"' USING DELIMITERS ',';");
+		System.out.println("Successfully inserting categories data into database");
+		System.out.println("Inserting products data.....");
+		stmt.execute("COPY products(cid,name,SKU,price) FROM '"+productsPath+"' USING DELIMITERS ',';");
+		System.out.println("Successfully inserting products data into database");
+		System.out.println("Inserting sales data.....");
+		stmt.execute("COPY sales(uid,pid,quantity,price) FROM '"+salesPath+"' USING DELIMITERS ',';");
+		System.out.println("Successfully inserting sales data into database");
 	}
 	public boolean dropCreateTable(String sql, String sql2) throws SQLException
 	{
@@ -75,5 +96,5 @@ public class Database
 	   conn.close();
 	   return true;
 	}
-	
+
 }
