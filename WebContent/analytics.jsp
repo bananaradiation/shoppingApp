@@ -94,34 +94,74 @@ try
          "where s.pid=p.id "+
          "group by p.name,p.id "+
          "order by p.name asc "+
-         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*20+";";
+         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+";";
     String SQL_prod_cat="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s, categories c "+
          "where s.pid=p.id and c.id=p.cid and c.name='"+category+"'"+
          " group by p.name,p.id "+
          "order by p.name asc "+
-         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*20+";";
+         "limit 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+";";
              
-//  customer option
-    String SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
-            "where s.uid=u.id and s.pid=p.id "+ 
-            "group by u.name "+ 
+//  customer option NEEDS TO TAKE INTO ACCOUT CATEGORY FOR Amount_Price REPORT PURPOSES
+	String SQL_cust ="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p ";
+	if(!category.equals("all"))
+    {
+    	SQL_cust = SQL_cust + ", categories c ";
+    }
+	SQL_cust = SQL_cust + "where s.uid=u.id and s.pid=p.id ";
+	if (!age.equals("all") && !state.equals("all")) {	
+        SQL_cust ="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p ";
+        if(!category.equals("all"))
+        {
+        	SQL_cust = SQL_cust + ", categories c ";
+        }
+       	SQL_cust = SQL_cust + "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age;	
+    }
+    else if (!age.equals("all")) {	
+    	SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p ";
+    	if(!category.equals("all"))
+        {
+        	SQL_cust = SQL_cust + ", categories c ";
+        }
+    	SQL_cust = SQL_cust + "where s.uid=u.id and s.pid=p.id and u.age between "+age;
+    }
+    else if (!state.equals("all")) {	            
+    	SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p ";
+    	if(!category.equals("all"))
+        {
+        	SQL_cust = SQL_cust + ", categories c ";
+        }
+    	SQL_cust = SQL_cust+ "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'";
+    }
+	
+	if(!category.equals("all"))
+    {
+    	SQL_cust = SQL_cust + " and c.id=p.cid and c.name='"+category+"'";
+    }
+	
+	SQL_cust = SQL_cust + " group by u.name "+ 
             "order by u.name asc "+
             "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-    String SQL_cust_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
-            "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age+ 
-            " group by u.name "+ 
-            "order by u.name asc "+
-            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-    String SQL_cust_age="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
-            "where s.uid=u.id and s.pid=p.id and u.age between "+age+ 
-            " group by u.name "+ 
-            "order by u.name asc "+
-            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-    String SQL_cust_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
-            "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ 
-            " group by u.name "+ 
-            "order by u.name asc "+
-            "limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+    
+  //  String SQL_cust="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+   //         "where s.uid=u.id and s.pid=p.id ";//+ 
+            //" group by u.name "+ 
+            //"order by u.name asc "+
+            //"limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+  //  String SQL_cust_age_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    //        "where s.uid=u.id and s.pid=p.id and u.state='"+state+"' and u.age between "+age;//+ 
+            //" group by u.name "+ 
+            //"order by u.name asc "+
+            //"limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+  //  String SQL_cust_age="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    //        "where s.uid=u.id and s.pid=p.id and u.age between "+age;//+ 
+            //" group by u.name "+ 
+            //"order by u.name asc "+
+            //"limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+  //  String SQL_cust_state="select u.name, sum(s.quantity*p.price) as amount from users u, sales s, products p "+
+    //        "where s.uid=u.id and s.pid=p.id and u.state='"+state+"'";//+ 
+            //" group by u.name "+ 
+            //"order by u.name asc "+
+            //"limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
      
     //  state option
     String SQL_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p "+
@@ -169,6 +209,11 @@ try
     
 //  row options
     if(option.equals("customers") || option.equals("")) {
+    	long startTime = System.currentTimeMillis();
+        rs_2=stmt_2.executeQuery(SQL_cust);
+		long finishTime = System.currentTimeMillis();
+		System.out.println("Time for query: " + (finishTime-startTime) + "ms lin 188");
+    	/*
     	if (!age.equals("all") && !state.equals("all")) {
     		long startTime = System.currentTimeMillis();
             rs_2=stmt_2.executeQuery(SQL_cust_age_state);
@@ -193,6 +238,7 @@ try
             long finishTime = System.currentTimeMillis();
             System.out.println("Time for query: " + (finishTime-startTime) + "ms line 206");
     	}
+    	*/
     }
     else if(option.equals("states")) {
     	if (!age.equals("all") && !state.equals("all")) {
@@ -227,7 +273,7 @@ try
 	    s_amount_price=rs_2.getFloat(2);
 	    item=new Item();
 	    item.setName(s_name);
-	    item.setAmount_price(s_amount_price);
+	    item.setAmount_price(s_amount_price); 
 	    s_list.add(item);
     }
     
@@ -342,7 +388,7 @@ if (showDashboard) { %>
     long startTime = System.currentTimeMillis();
     for(i=0;i<s_list.size();i++) {
         s_name          =   s_list.get(i).getName();
-        s_amount_price  =   s_list.get(i).getAmount_price();
+        s_amount_price  =   s_list.get(i).getAmount_price(); 
         out.println("<tr  align=\"center\">");
         out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>"); 
 
@@ -378,7 +424,7 @@ if (showDashboard) { %>
 			<tr>
 				<td align="center">
 					<% 
-	     if (s_list.size() >= 20) {
+	     if (s_list.size() >= 20) { 
 	         if (option.equals("states")) { %>
 					<button type="submit" align="center">Next 20 States</button> <% } 
 	         else { %>
@@ -397,7 +443,7 @@ if (showDashboard) { %>
 			<tr>
 				<td align="center">
 					<% 
-	     if (p_list.size() >= 10) { %>
+	     if (p_list.size() >= 10) { %> 
 					<button type="submit">Next 10 Products</button>
 			</tr>
 			<%
