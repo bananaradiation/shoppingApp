@@ -84,7 +84,7 @@ ResultSet row_rs=null, col_rs=null, grid_rs=null;
 try
 {
     try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-    String url="jdbc:postgresql://localhost/cse135test123";
+    String url="jdbc:postgresql://localhost/cse135";
     String user="postgres";
     String password="postgres";
     conn = DriverManager.getConnection(url, user, password);
@@ -338,13 +338,84 @@ for(i=0;i<p_list.size();i++) {
 } %>
     </tr> <%  
 
-startTime = System.currentTimeMillis();  
+startTime = System.currentTimeMillis();
+String tabOff, tabsql, productname;
+int[] tabOffset = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+/**/
+if(request.getParameter("tableOffset0") != null)
+{
+	tabOffset[0] = Integer.parseInt(request.getParameter("tableOffset0"));
+	tabOffset[1] = Integer.parseInt(request.getParameter("tableOffset1"));
+	tabOffset[2] = Integer.parseInt(request.getParameter("tableOffset2"));
+	tabOffset[3] = Integer.parseInt(request.getParameter("tableOffset3"));
+	tabOffset[4] = Integer.parseInt(request.getParameter("tableOffset4"));
+	tabOffset[5] = Integer.parseInt(request.getParameter("tableOffset5"));
+	tabOffset[6] = Integer.parseInt(request.getParameter("tableOffset6"));
+	tabOffset[7] = Integer.parseInt(request.getParameter("tableOffset7"));
+	tabOffset[8] = Integer.parseInt(request.getParameter("tableOffset8"));
+	tabOffset[9] = Integer.parseInt(request.getParameter("tableOffset9"));
+	tabOffset[10] = Integer.parseInt(request.getParameter("tableOffset10"));
+	tabOffset[11] = Integer.parseInt(request.getParameter("tableOffset11"));
+	tabOffset[12] = Integer.parseInt(request.getParameter("tableOffset12"));
+	tabOffset[13] = Integer.parseInt(request.getParameter("tableOffset13"));
+	tabOffset[14] = Integer.parseInt(request.getParameter("tableOffset14"));
+	tabOffset[15] = Integer.parseInt(request.getParameter("tableOffset15"));
+	tabOffset[16] = Integer.parseInt(request.getParameter("tableOffset16"));
+	tabOffset[17] = Integer.parseInt(request.getParameter("tableOffset17"));
+	tabOffset[18] = Integer.parseInt(request.getParameter("tableOffset18"));
+	tabOffset[19] = Integer.parseInt(request.getParameter("tableOffset19"));
+}
+
+for(i=0; i<s_list.size(); i++)
+{
+	s_name          =   s_list.get(i).getName();
+    s_amount_price  =   s_list.get(i).getAmount_price();
+    out.println("<tr  align=\"center\">");
+    out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>");
+	tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
+			"FROM sales s, products p, users u, categories c "+
+			"WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid ";
+			if(!category.equals("all"))
+			{
+				tabsql = tabsql+ "AND c.name = '"+category+"' ";// AND u.name = '"+s_name+"' "+
+			}
+			
+			if("customers".equals(option) || "".equals(option)) {
+				tabsql = tabsql+ "AND u.name = '"+s_name+"' ";
+			}
+			else if ("states".equals(option)) {
+				tabsql = tabsql+ "AND u.state = '"+s_name+"' ";
+			}
+	tabsql = tabsql + "GROUP BY p.name, u.state "+
+			"ORDER BY p.name "+
+			"LIMIT 20 OFFSET " + tabOffset[i] + ";";
+	grid_rs = grid_stmt.executeQuery(tabsql);
+	grid_rs.next();
+	for(j = 0; j < p_list.size(); j++)
+	{
+		p_name = p_list.get(j).getName();
+		productname = grid_rs.getString(1);
+		if(productname.equals(p_name))
+		{
+			amount=grid_rs.getFloat(2);
+            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
+            tabOffset[i]++;
+            grid_rs.next();
+		}
+		else
+		{
+			out.println("<td><font color='#ff0000'>0</font></td>");
+		}
+	}
+	out.println("</tr>");
+}
+/*
 for(i=0;i<s_list.size();i++) {
     s_name          =   s_list.get(i).getName();
     s_amount_price  =   s_list.get(i).getAmount_price();
     out.println("<tr  align=\"center\">");
-    out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>"); 
-
+    out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>");
+	
     for(j=0;j<p_list.size();j++) {      
         p_id            =   p_list.get(j).getId();
         p_name          =   p_list.get(j).getName();
@@ -353,7 +424,7 @@ for(i=0;i<s_list.size();i++) {
         String SQL_grid_state="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
                 "where c.uid=u.id and c.pid=p.id and u.state='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
         String SQL_grid_cust="select sum(c.quantity*p.price) as amount from users u, products p, sales c "+
-                   "where c.uid=u.id and c.pid=p.id and u.name='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
+                "where c.uid=u.id and c.pid=p.id and u.name='"+s_name+"' and p.id='"+p_id+"' group by u.state, p.name";
            
         if("customers".equals(option) || "".equals(option)) {
            grid_rs = grid_stmt.executeQuery(SQL_grid_cust);
@@ -369,8 +440,9 @@ for(i=0;i<s_list.size();i++) {
            out.println("<td><font color='#ff0000'>0</font></td>");
         }
     }
+
     out.println("</tr>");
-}
+}/**/
 finishTime = System.currentTimeMillis();
 System.out.println("Time for GRID query: " + (finishTime-startTime) + "ms line 429"); %>
     <form action="analytics.jsp" method="GET">
@@ -390,6 +462,27 @@ System.out.println("Time for GRID query: " + (finishTime-startTime) + "ms line 4
                 name="state" value="<%=state %>" /> <input type="hidden"
                 name="category" value="<%=category %>" /> <input type="hidden"
                 name="option" value="<%=option %>" />
+          <input type="hidden" name="tableOffset0" value=<%=tabOffset[0]%> />
+          <input type="hidden" name="tableOffset1" value=<%=tabOffset[1]%> />
+          <input type="hidden" name="tableOffset2" value=<%=tabOffset[2]%> />
+          <input type="hidden" name="tableOffset3" value=<%=tabOffset[3]%> />
+          <input type="hidden" name="tableOffset4" value=<%=tabOffset[4]%> />
+          <input type="hidden" name="tableOffset5" value=<%=tabOffset[5]%> />
+          <input type="hidden" name="tableOffset6" value=<%=tabOffset[6]%> />
+          <input type="hidden" name="tableOffset7" value=<%=tabOffset[7]%> />
+          <input type="hidden" name="tableOffset8" value=<%=tabOffset[8]%> />
+          <input type="hidden" name="tableOffset9" value=<%=tabOffset[9]%> />
+          <input type="hidden" name="tableOffset10" value=<%=tabOffset[10]%> />
+          <input type="hidden" name="tableOffset11" value=<%=tabOffset[11]%> />
+          <input type="hidden" name="tableOffset12" value=<%=tabOffset[12]%> />
+          <input type="hidden" name="tableOffset13" value=<%=tabOffset[13]%> />
+          <input type="hidden" name="tableOffset14" value=<%=tabOffset[14]%> />
+          <input type="hidden" name="tableOffset15" value=<%=tabOffset[15]%> />
+          <input type="hidden" name="tableOffset16" value=<%=tabOffset[16]%> />
+          <input type="hidden" name="tableOffset17" value=<%=tabOffset[17]%> />
+          <input type="hidden" name="tableOffset18" value=<%=tabOffset[18]%> />
+          <input type="hidden" name="tableOffset19" value=<%=tabOffset[19]%> />
+          
             </td>
     </form>
     <form action="analytics.jsp" method="GET">
@@ -408,6 +501,26 @@ System.out.println("Time for GRID query: " + (finishTime-startTime) + "ms line 4
             name="state" value="<%=state %>" /> <input type="hidden"
             name="category" value="<%=category %>" /> <input type="hidden"
             name="option" value="<%=option %>" />
+        <input type="hidden" name="tableOffset0" value=<%=tabOffset[0]%> />
+          <input type="hidden" name="tableOffset1" value=<%=tabOffset[1]%> />
+          <input type="hidden" name="tableOffset2" value=<%=tabOffset[2]%> />
+          <input type="hidden" name="tableOffset3" value=<%=tabOffset[3]%> />
+          <input type="hidden" name="tableOffset4" value=<%=tabOffset[4]%> />
+          <input type="hidden" name="tableOffset5" value=<%=tabOffset[5]%> />
+          <input type="hidden" name="tableOffset6" value=<%=tabOffset[6]%> />
+          <input type="hidden" name="tableOffset7" value=<%=tabOffset[7]%> />
+          <input type="hidden" name="tableOffset8" value=<%=tabOffset[8]%> />
+          <input type="hidden" name="tableOffset9" value=<%=tabOffset[9]%> />
+          <input type="hidden" name="tableOffset10" value=<%=tabOffset[10]%> />
+          <input type="hidden" name="tableOffset11" value=<%=tabOffset[11]%> />
+          <input type="hidden" name="tableOffset12" value=<%=tabOffset[12]%> />
+          <input type="hidden" name="tableOffset13" value=<%=tabOffset[13]%> />
+          <input type="hidden" name="tableOffset14" value=<%=tabOffset[14]%> />
+          <input type="hidden" name="tableOffset15" value=<%=tabOffset[15]%> />
+          <input type="hidden" name="tableOffset16" value=<%=tabOffset[16]%> />
+          <input type="hidden" name="tableOffset17" value=<%=tabOffset[17]%> />
+          <input type="hidden" name="tableOffset18" value=<%=tabOffset[18]%> />
+          <input type="hidden" name="tableOffset19" value=<%=tabOffset[19]%> />
         </td>
     </form>
     <form action="analytics.jsp" method="GET">
@@ -421,7 +534,8 @@ catch(Exception e) {
     out.println(e.getMessage()); }
 finally {
     System.out.println("End query");
-    conn.close(); }   
+    conn.close(); 
+   }   
 %>
 </body>
 </html>
