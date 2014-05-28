@@ -1,0 +1,133 @@
+loading analytics.jsp
+	Time for ROW query: 22914ms | 45308ms 
+	Time for COL query: 8081ms | 8102ms
+	Time for GRID query: 2567ms | 3042ms  
+
+NO INDEX | WITH INDEX
+
+option: customers
+filter: category = C9 ***
+	Time for ROW query: 7476ms | 251ms ***
+	Time for COL query: 232ms | 232ms
+	Time for GRID query: 2872ms | 3009ms
+next 10 products/20 customers:
+	Time for ROW query: 226ms | 241ms
+	Time for COL query: 212ms | 246ms
+	Time for GRID query: 2859ms | 2373ms
+
+filter: age = 18 and 45
+	Time for ROW query: 20502ms | 5738ms ***
+	Time for COL query: 8995ms | 8500ms
+	Time for GRID query: 3216ms | 2519ms
+next 10 products/20 customers:
+	Time for ROW query: 5730ms | 5958ms
+	Time for COL query: 8130ms | 8141ms
+	Time for GRID query: 2260ms | 2699ms
+
+filter: state = Delaware
+	Time for ROW query: 2015ms | 2000ms
+	Time for COL query: 8154ms | 8194ms
+	Time for GRID query: 2577ms | 2810ms
+next 10 products/20 customers:
+	Time for ROW query: 1875ms | 1930ms
+	Time for COL query: 8155ms | 8175ms
+	Time for GRID query: 2305ms | 2842ms
+
+filter: category = C8 and state = Kentucky
+	Time for ROW query: 6321ms | 8815ms ***
+	Time for COL query: 223ms | 241ms
+	Time for GRID query: 1323ms | 1429ms
+next 10 products/20 customers:
+	ResultSet not positioned properly, perhaps you need to call next.
+
+filter: category = C10 and age = 12 and 18
+	Time for ROW query: 5834ms | 7617ms ***
+	Time for COL query: 218ms | 246ms
+	Time for GRID query: 2969ms | 3202ms
+next 10 products/20 customers:
+	Time for ROW query: 226ms | 249ms
+	Time for COL query: 218ms | 242ms
+	Time for GRID query: 2290ms | 2437ms
+
+filter: state = Delaware and age = 12 and 18
+	Time for ROW query: 5853ms | 6188ms
+	Time for COL query: 8383ms | 8214ms
+	Time for GRID query: 2612ms | 3089ms
+next 10 products/20 customers:
+	Time for ROW query: 1368ms | 1368ms
+	Time for COL query: 8224ms | 8234ms
+	Time for GRID query: 2496ms | 2414ms
+
+filter: state = California, age = 18 and 45, category = C172
+	Time for ROW query: 10672ms | 255ms ***
+	Time for COL query: 230ms | 236ms
+	Time for GRID query: 505ms | 410ms
+next 10 products/20 customers:
+	Time for ROW query: 254ms | result set not positioned properly
+	Time for COL query: 267ms | 
+	Time for GRID query: 341ms | 
+
+
+option: states
+filter: category = C9 ***
+	Time for ROW query: 1889ms | 484ms ***
+	Time for COL query: 8249ms | 238ms ***
+	Time for GRID query: 1940ms | 4965ms ***
+next 10 products/20 customers:
+	Time for ROW query: 1851ms | 251ms ***
+	Time for COL query: 8176ms | 244ms ***
+	Time for GRID query: 1942ms | 4783ms ***
+
+filter: age = 18 and 45
+	Time for ROW query: 3618ms | 3750ms
+	Time for COL query: 8028ms | 8311ms
+	Time for GRID query: 39041ms | 40095ms
+next 10 products/20 customers:
+	Time for ROW query: 3587ms | 3723ms
+	Time for COL query: 8045ms | 8240ms
+	Time for GRID query: 38609ms | 40456ms
+
+filter: state = Delaware
+	Time for ROW query: 1904ms | 1917ms
+	Time for COL query: 8414ms | 8343ms
+	Time for GRID query: 2052ms | 1997ms
+next 10 products/20 customers:
+	Time for ROW query: 1847ms | 1865ms
+	Time for COL query: 8272ms | 8409ms
+	Time for GRID query: 1907ms | 1962ms
+
+filter: category = C8, state = Kentucky
+	Time for ROW query: 6294ms | 248ms ***
+	Time for COL query: 212ms | 242ms
+	Time for GRID query: 271ms | 298ms
+next 10 products/20 customers:
+	Time for ROW query: 222ms | 243ms
+	Time for COL query: 225ms | 247ms
+	Time for GRID query: 238ms | 240ms
+
+filter: category = C10, age = 12 and 18
+	Time for ROW query: 5559ms | 243ms *****
+	Time for COL query: 216ms | 249ms
+	Time for GRID query: 4477ms | 4902ms
+next 10 products/20 customers:
+	Time for ROW query: 221ms | 242ms
+	Time for COL query: 226ms | 240ms
+	Time for GRID query: 2471ms | 3598ms
+
+filter: state = Delaware, age = 12 and 18
+	Time for ROW query: 1555ms | 1381ms
+	Time for COL query: 8456ms | 8773ms
+	Time for GRID query: 2017ms | 2188ms
+next 10 products/20 customers:
+	Time for ROW query: 1627ms | 1468ms
+	Time for COL query: 8234ms | 8835ms
+	Time for GRID query: 1907ms | 2027ms
+
+filter: state = California, age = 18 and 45, category = C172
+	Time for ROW query: 288ms | 357ms
+	Time for COL query: 215ms | 256ms
+	Time for GRID query: 275ms | 286ms
+next 10 products/20 customers:
+	Time for ROW query: 217ms | 237ms
+	Time for COL query: 232ms | 254ms
+	Time for GRID query: 222ms | 230ms

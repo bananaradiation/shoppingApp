@@ -120,8 +120,8 @@ try
     String SQL_state_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s, products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"'"+ state_end;
     String SQL_state_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
     String SQL_state_state_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.state='"+state+"'"+state_end;
-    String SQL_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.age between "+age+" and u.state='"+state+"'"+state_end;
-    String SQL_state_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and c.age between "+age+" and u.state='"+state+"'"+state_end;
+    String SQL_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and u.age between "+age+" and c.name='"+category+"'"+state_end;
+    String SQL_state_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.age between "+age+" and u.state='"+state+"'"+state_end;
     
     // SQL - product (col)
     String SQL_prod="select p.id, p.name, sum(s.quantity*p.price) as amount from products p, sales s "+
@@ -391,22 +391,24 @@ for(i=0; i<s_list.size(); i++)
 			"LIMIT 20 OFFSET " + tabOffset[i] + ";";
 	grid_rs = grid_stmt.executeQuery(tabsql);
 	grid_rs.next();
-	for(j = 0; j < p_list.size(); j++)
-	{
-		p_name = p_list.get(j).getName();
-		productname = grid_rs.getString(1);
-		if(productname.equals(p_name))
+		for(j = 0; j < p_list.size(); j++)
 		{
-			amount=grid_rs.getFloat(2);
-            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
-            tabOffset[i]++;
-            grid_rs.next();
+			p_name = p_list.get(j).getName();
+			productname = grid_rs.getString(1);
+			if(productname.equals(p_name))
+			{
+				amount=grid_rs.getFloat(2);
+	            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
+	            tabOffset[i]++;
+	            grid_rs.next();   
+			}
+			else
+			{
+				out.println("<td><font color='#ff0000'>0</font></td>");
+				
+			}
 		}
-		else
-		{
-			out.println("<td><font color='#ff0000'>0</font></td>");
-		}
-	}
+	
 	out.println("</tr>");
 }
 /*
