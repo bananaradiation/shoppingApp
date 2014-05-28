@@ -330,6 +330,7 @@ if (showDashboard) { %>
         <td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>
         <% }
 
+// displays product aggregation headers in grid
 for(i=0;i<p_list.size();i++) {
     p_id            =   p_list.get(i).getId();
     p_name          =   p_list.get(i).getName();
@@ -341,72 +342,86 @@ for(i=0;i<p_list.size();i++) {
 startTime = System.currentTimeMillis();
 String tabOff, tabsql, productname;
 int[] tabOffset = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-/**/
 if(request.getParameter("tableOffset0") != null)
 {
-	tabOffset[0] = Integer.parseInt(request.getParameter("tableOffset0"));
-	tabOffset[1] = Integer.parseInt(request.getParameter("tableOffset1"));
-	tabOffset[2] = Integer.parseInt(request.getParameter("tableOffset2"));
-	tabOffset[3] = Integer.parseInt(request.getParameter("tableOffset3"));
-	tabOffset[4] = Integer.parseInt(request.getParameter("tableOffset4"));
-	tabOffset[5] = Integer.parseInt(request.getParameter("tableOffset5"));
-	tabOffset[6] = Integer.parseInt(request.getParameter("tableOffset6"));
-	tabOffset[7] = Integer.parseInt(request.getParameter("tableOffset7"));
-	tabOffset[8] = Integer.parseInt(request.getParameter("tableOffset8"));
-	tabOffset[9] = Integer.parseInt(request.getParameter("tableOffset9"));
-	tabOffset[10] = Integer.parseInt(request.getParameter("tableOffset10"));
-	tabOffset[11] = Integer.parseInt(request.getParameter("tableOffset11"));
-	tabOffset[12] = Integer.parseInt(request.getParameter("tableOffset12"));
-	tabOffset[13] = Integer.parseInt(request.getParameter("tableOffset13"));
-	tabOffset[14] = Integer.parseInt(request.getParameter("tableOffset14"));
-	tabOffset[15] = Integer.parseInt(request.getParameter("tableOffset15"));
-	tabOffset[16] = Integer.parseInt(request.getParameter("tableOffset16"));
-	tabOffset[17] = Integer.parseInt(request.getParameter("tableOffset17"));
-	tabOffset[18] = Integer.parseInt(request.getParameter("tableOffset18"));
-	tabOffset[19] = Integer.parseInt(request.getParameter("tableOffset19"));
+	for (int off=0;off<20;off++) {
+		tabOffset[off] = Integer.parseInt(request.getParameter("tableOffset"+off));
+	}
 }
 
 for(i=0; i<s_list.size(); i++)
 {
 	s_name          =   s_list.get(i).getName();
     s_amount_price  =   s_list.get(i).getAmount_price();
+//     displays row aggregation headers in grid
     out.println("<tr  align=\"center\">");
     out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>");
-	tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
-			"FROM sales s, products p, users u, categories c "+
-			"WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid ";
-			if(!category.equals("all"))
-			{
-				tabsql = tabsql+ "AND c.name = '"+category+"' ";// AND u.name = '"+s_name+"' "+
-			}
+   
+
+    
+//  original sql
+// 	tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
+// 			"FROM sales s, products p, users u, categories c "+
+// 			"WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid ";
 			
-			if("customers".equals(option) || "".equals(option)) {
-				tabsql = tabsql+ "AND u.name = '"+s_name+"' ";
-			}
-			else if ("states".equals(option)) {
-				tabsql = tabsql+ "AND u.state = '"+s_name+"' ";
-			}
-	tabsql = tabsql + "GROUP BY p.name, u.state "+
+    //nested sql in FROM clause
+// 	tabsql = "SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
+//             "FROM sales s, products p, users u, (SELECT * FROM categories c WHERE c.name = '"+category+"') cat" +
+//             "WHERE p.id = s.pid AND u.id = s.uid AND categories.id = p.cid";
+    
+            
+    String nested_where = "(SELECT c.id FROM categories c WHERE c.name = '"+category+"') ";
+	if(!category.equals("all")) {
+	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
+	            "FROM sales s, products p, users u "+
+	            "WHERE p.id = s.pid AND u.id = s.uid ";
+		if("customers".equals(option) || "".equals(option)) {
+            tabsql = tabsql + "AND u.name = '"+s_name+"' ";
+        }
+        else if ("states".equals(option)) {
+            tabsql = tabsql + "AND u.state = '"+s_name+"' ";
+        }    
+		tabsql = tabsql + "AND p.cid IN " + nested_where;
+	}
+	else {
+		tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
+	          "FROM sales s, products p, users u, categories c "+
+	          "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid ";
+		if("customers".equals(option) || "".equals(option)) {
+            tabsql = tabsql+ "AND u.name = '"+s_name+"' ";
+        }
+	    else if ("states".equals(option)) {
+            tabsql = tabsql+ "AND u.state = '"+s_name+"' ";
+        }
+	}
+
+    tabsql = tabsql + "GROUP BY p.name, u.state "+
 			"ORDER BY p.name "+
 			"LIMIT 20 OFFSET " + tabOffset[i] + ";";
+	
 	grid_rs = grid_stmt.executeQuery(tabsql);
-	grid_rs.next();
+	boolean flag = grid_rs.next();
 		for(j = 0; j < p_list.size(); j++)
 		{
 			p_name = p_list.get(j).getName();
-			productname = grid_rs.getString(1);
-			if(productname.equals(p_name))
-			{
-				amount=grid_rs.getFloat(2);
-	            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
-	            tabOffset[i]++;
-	            grid_rs.next();   
+			if (flag) {
+				productname = grid_rs.getString(1);
+				if(productname.equals(p_name))
+				{
+					amount=grid_rs.getFloat(2);
+		            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
+		            tabOffset[i]++;
+		            flag = grid_rs.next();
+				}
+				else
+				{
+					out.println("<td><font color='#ff0000'>0</font></td>");
+				}
 			}
-			else
-			{
+			else {
 				out.println("<td><font color='#ff0000'>0</font></td>");
-				
 			}
+			
 		}
 	
 	out.println("</tr>");
