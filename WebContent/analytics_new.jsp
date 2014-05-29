@@ -98,68 +98,32 @@ try
  String temp_end = "";
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name, users_temp.state ";
- String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.name='"+category+"'"+" GROUP BY users_temp.id, users_temp.name ORDER BY name;";
+ String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.name='"+category+"' GROUP BY users_temp.id, users_temp.name";
  
  startTime = System.currentTimeMillis(); 
-
     if(option.equals("customers") || option.equals("")) {
     	start_row = "SELECT users_temp.name, ";
     	end_row = "ORDER BY users_temp.name";
     	temp_end = "ORDER BY name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
+        temp_row = conn.createStatement();
 
-	    if (!age.equals("all") && !state.equals("all") && !category.equals("all")) {
-	    	String temp8 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
-	        temp_row = conn.createStatement();
-	        temp_row.execute(temp_st+temp8);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	        
-	//        row_rs=row_stmt.executeQuery(sql_u+sql_age_state_prod);
-	    }
-	     else if (!state.equals("all") && !category.equals("all")) {
-	    	 String temp8 = "(SELECT * FROM users WHERE state='"+state+"' " + temp_end;
-		     temp_row = conn.createStatement();
-		     temp_row.execute(temp_st+temp8);
-		     row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	//         row_rs=row_stmt.executeQuery(sql_u+sql_state_prod);
-	     }
-	     else if (!age.equals("all") && !category.equals("all")) {
-	//         row_rs=row_stmt.executeQuery(sql_u+sql_age_prod);
-	    	 String temp8 = "(SELECT * FROM users WHERE age BETWEEN "+age+ temp_end;
-		     temp_row = conn.createStatement();
-		     temp_row.execute(temp_st+temp8);
-		     row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	     }
-	    else if (!age.equals("all") && !state.equals("all")) {
-	    	String temp5 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
-	        temp_row = conn.createStatement();
-	        temp_row.execute(temp_st+temp5);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	    }
+	    if (!age.equals("all") && !state.equals("all")) {
+            String temp5 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
+            temp_row.execute(temp_st+temp5);
+        }
 	    else if (!state.equals("all")) {
 	    	String temp4 = "(SELECT * FROM users WHERE state='"+state+"'"+ temp_end;
-	        temp_row = conn.createStatement();
 	        temp_row.execute(temp_st+temp4);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
 	    }
-	    else if (!category.equals("all")) {
-	    	String temp3 = "(SELECT * FROM users " + temp_end;
-	        temp_row = conn.createStatement();
-	        temp_row.execute(temp_st+temp3);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	    }
-	
 	    else if (!age.equals("all")) {
 	        String temp2 = "(SELECT * FROM users WHERE age BETWEEN "+age + temp_end;
-	        temp_row = conn.createStatement();
 	        temp_row.execute(temp_st+temp2);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
 	    }
 	    else {
 	        String temp1 = "(SELECT * FROM users " + temp_end;
-	        temp_row = conn.createStatement();
 	        temp_row.execute(temp_st+temp1);
-	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
 	    }
+        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
     }
 	else {
 //         start_row = "SELECT users_temp.state, ";
@@ -183,16 +147,8 @@ try
         String SQL_state_state_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.state='"+state+"'"+state_end;
         String SQL_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and u.age between "+age+" and c.name='"+category+"'"+state_end;
         String SQL_state_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.age between "+age+" and u.state='"+state+"'"+state_end;
-        if (!state.equals("all") && !age.equals("all") && !category.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_state_age_prod);
-        }
-        else if (!age.equals("all") && !category.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_age_prod);
-        }
-        else if (!state.equals("all") && !category.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_state_prod);
-        }
-        else if (!state.equals("all") && !age.equals("all")) {
+        
+        if (!state.equals("all") && !age.equals("all")) {
             row_rs=row_stmt.executeQuery(SQL_state_state_age);
         }
         else if (!state.equals("all")) {
@@ -200,9 +156,6 @@ try
         }
         else if (!age.equals("all")) {
             row_rs=row_stmt.executeQuery(SQL_state_age);
-        }
-        else if (!category.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_prod);
         }
         else {
             row_rs=row_stmt.executeQuery(SQL_state);
@@ -212,12 +165,10 @@ try
     finishTime = System.currentTimeMillis();
     System.out.println("Time for ROW query: " + (finishTime-startTime));
     
-    
     String prod_temp1 = "CREATE TEMPORARY TABLE products_temp AS (SELECT * FROM products ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
     String prod_temp2 = "CREATE TEMPORARY TABLE products_temp AS (SELECT products.name, products.id, products.cid, products.price FROM products JOIN categories ON products.cid=categories.id WHERE categories.name='"+category+"' ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
     Statement temp_prod_stmt=conn.createStatement();
     String sql_prod_base = "SELECT products_temp.name, SUM(sales.quantity * sales.price) AS AMOUNT FROM products_temp LEFT OUTER JOIN sales ON sales.pid = products_temp.id GROUP BY products_temp.id, products_temp.name ORDER BY products_temp.name;";
-    String sql_prod_cat = "SELECT products_temp.name, SUM(sales.quantity * sales.price) AS AMOUNT FROM products_temp LEFT OUTER JOIN sales ON sales.pid = products_temp.id JOIN categories ON products_temp.cid=categories.id WHERE categories.name='"+category+"' GROUP BY products_temp.id, products_temp.name ORDER BY products_temp.name;";
 
     startTime = System.currentTimeMillis();
     if (!category.equals("all")) {
@@ -269,7 +220,7 @@ float amount=0;
 
 if (showDashboard) { %>
     <table>
-        <form action="analytics.jsp" method="POST">
+        <form action="analytics_new.jsp" method="POST">
             <tr>
                 <td>Sort rows by:</td>
                 <td><select name="option">
@@ -466,7 +417,7 @@ for(i=0; i<s_list.size(); i++)
 
 finishTime = System.currentTimeMillis();
 System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
-    <form action="analytics.jsp" method="GET">
+    <form action="analytics_new.jsp" method="GET">
         <tr>
             <td align="center">
                 <% 
@@ -506,7 +457,7 @@ System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
           
             </td>
     </form>
-    <form action="analytics.jsp" method="GET">
+    <form action="analytics_new.jsp" method="GET">
         <tr>
             <td align="center">
                 <% 
@@ -544,7 +495,7 @@ System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
           <input type="hidden" name="tableOffset19" value=<%=tabOffset[19]%> />
         </td>
     </form>
-    <form action="analytics.jsp" method="GET">
+    <form action="analytics_new.jsp" method="GET">
         <tr><td align="center">
         <button type="submit">Analytics Home</button></td></tr>
     </form>
