@@ -108,15 +108,27 @@ try
     	temp_end = "ORDER BY name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
 
 	    if (!age.equals("all") && !state.equals("all") && !category.equals("all")) {
+	    	String temp8 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
+	        temp_row = conn.createStatement();
+	        temp_row.execute(temp_st+temp8);
+	        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
 	        
-	//         row_rs=row_stmt.executeQuery(sql_u+sql_age_state_prod);
+	//        row_rs=row_stmt.executeQuery(sql_u+sql_age_state_prod);
 	    }
-	//     else if (!state.equals("all") && !category.equals("all")) {
+	     else if (!state.equals("all") && !category.equals("all")) {
+	    	 String temp8 = "(SELECT * FROM users WHERE state='"+state+"' " + temp_end;
+		     temp_row = conn.createStatement();
+		     temp_row.execute(temp_st+temp8);
+		     row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
 	//         row_rs=row_stmt.executeQuery(sql_u+sql_state_prod);
-	//     }
-	//     else if (!age.equals("all") && !category.equals("all")) {
+	     }
+	     else if (!age.equals("all") && !category.equals("all")) {
 	//         row_rs=row_stmt.executeQuery(sql_u+sql_age_prod);
-	//     }
+	    	 String temp8 = "(SELECT * FROM users WHERE age BETWEEN "+age+ temp_end;
+		     temp_row = conn.createStatement();
+		     temp_row.execute(temp_st+temp8);
+		     row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
+	     }
 	    else if (!age.equals("all") && !state.equals("all")) {
 	    	String temp5 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
 	        temp_row = conn.createStatement();
