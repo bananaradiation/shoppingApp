@@ -74,7 +74,7 @@ ResultSet row_rs=null, col_rs=null, grid_rs=null;
 try
 {
     try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-    String url="jdbc:postgresql://localhost/cse135";
+    String url="jdbc:postgresql://localhost/db3";
     String user="postgres";
     String password="postgres";
     conn = DriverManager.getConnection(url, user, password);
@@ -83,7 +83,7 @@ try
     grid_stmt = conn.createStatement();
     Statement st = conn.createStatement();
     
-    String stateList[] = {"Alabama","Alaska","Arizona","Arkansas",
+    String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
             "California","Colorado","Connecticut","Delaware","Florida","Georgia",
             "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
             "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
@@ -109,7 +109,7 @@ try
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
 //  String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
- String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
+ String sql_prod = "SUM(quantity * s2.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s2 ON users_temp.id = s2.uid GROUP BY users_temp.name ";
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
@@ -118,13 +118,13 @@ try
     	temp_end = " ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
     	
     	if (!age.equals("all") && !state.equals("all") && category !=0) {
-    	    temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+    	    temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
             }
     	else if (!state.equals("all") && category !=0) {
 	        temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
     	else if (!age.equals("all") && category !=0) {
-    	    temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+    	    temp = "(SELECT users.name, users.id, users.age FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
     	else if (!age.equals("all") && !state.equals("all")) {
             temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
@@ -159,7 +159,7 @@ try
         }
         String SQL_state = "SELECT u.state, SUM(quantity * sales.price) AS AMOUNT FROM "+nest_st+" AS s JOIN users u ON u.state=s.state LEFT OUTER JOIN sales ON sales.uid = u.id";
         String SQL_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+ state_end;
-        String SQL_state_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
+        String SQL_state_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+" and u.state='"+state+"' group by u.state;";
         String SQL_state_prod= "SELECT u.state, sum(sales.quantity*sales.price) as amount FROM users u JOIN sales ON sales.uid = u.id JOIN products p ON sales.pid=p.id";
         String SQL_state_state_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.state='"+state+"'";
         String SQL_state_age_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.age between "+age;
@@ -169,7 +169,7 @@ try
             row_rs=row_stmt.executeQuery(SQL_state_state_age_prod+state_end);
         }
         else if (!state.equals("all") && !age.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_state_age+state_end);
+            row_rs=row_stmt.executeQuery(SQL_state_state_age);
         }
         else if (!age.equals("all") && category !=0) {
             row_rs=row_stmt.executeQuery(SQL_state_age_prod+state_end);
@@ -276,9 +276,10 @@ if (showDashboard) { %>
         <tr>
             <td>State:</td>
             <td><select name="state">
+            
                     <option value="<%=state %>"><%=state %></option>
                     <%
-            for (i = 0; i < 50; i++) { 
+            for (i = 0; i < 50; i++) {
                 if (!stateList[i].equals(state)) { %>
                     <option value="<%=stateList[i]%>"><%=stateList[i]%></option>
                     <% } } %>
@@ -386,7 +387,7 @@ for(i=0; i<s_list.size(); i++)
         }    
 		tabsql = tabsql + " AND p.cid = " + category;
 		if (!age.equals("all")) {
-			tabsql = tabsql + " AND age between " + age;
+			tabsql = tabsql + " AND u.age between " + age;
 		}
 		if (!state.equals("all")) {
 			tabsql = tabsql + " AND u.state = '"+state+"'";
