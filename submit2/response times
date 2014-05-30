@@ -1,0 +1,78 @@
+NO INDICES | INDICES 
+
+loading analytics.jsp
+	Time for ROW query: 10189 | 
+	Time for COL query:  7324 | 
+	Time for GRID query: 41 | 
+
+option: customers
+filter: category = C1
+	Time for ROW query: 53841 | 251ms |
+	Time for COL query: 160 | 232ms
+	Time for GRID query: 100 | 3009ms | | 2237ms
+
+filter: age = 12 and 18
+	Time for ROW query: 10040 | 5738ms |
+	Time for COL query: 156 | 8500ms |
+	Time for GRID query: 27 | 2519ms |
+
+filter: state = Alabama
+	Time for ROW query: 9412 | 2000ms |
+	Time for COL query: 595 | 8194ms |
+	Time for GRID query: 27 | 2810ms |
+
+filter: category = C1 and state = Alabama
+	Time for ROW query: 27540 | 8815ms |
+	Time for COL query: 44 | 241ms |
+	Time for GRID query: 2145 | 1429ms |
+
+filter: category = C1 and age = 12 and 18
+	Time for ROW query: 82122 | 7617ms | 
+	Time for COL query: 435 | 246ms | |
+	Time for GRID query: 4348 | 3202ms | 
+
+filter: state = Alabama and age = 12 and 18
+	Time for ROW query: 7169 | 6188ms |
+	Time for COL query: 152 | 8214ms |
+	Time for GRID query: 29 | 3089ms |
+
+filter: state = Alabama, age = 12 and 18, category = C1
+	Time for ROW query: 80941 | 255ms | 
+	Time for COL query: 826 | 236ms |
+	Time for GRID query: 2692 | 410ms | 
+
+option: states
+filter: category = C1
+	Time for ROW query: 53841 | 251ms |
+	Time for COL query: 160 | 232ms
+	Time for GRID query: 100 | 3009ms | 
+
+filter: age = 12 and 18 
+	Time for ROW query: 35539 | 5738ms |
+	Time for COL query: 251 | 8500ms |
+	Time for GRID query: 2220 | 2519ms |
+
+filter: state = Alabama
+	Time for ROW query: 148830 | 2000ms |
+	Time for COL query: 207 | 8194ms |
+	Time for GRID query: 161 | 2810ms |
+
+filter: category = C1 and state = Alabama
+	Time for ROW query: 119 | 8815ms |
+	Time for COL query: 80 | 241ms |
+	Time for GRID query: 918 | 1429ms |
+
+filter: category = C1 and age = 12 and 18
+	Time for ROW query: 152 | 7617ms 
+	Time for COL query: 100 | 246ms 
+	Time for GRID query: 125 | 3202ms  
+
+filter: state = Alabama and age = 12 and 18
+	Time for ROW query: 696 | 6188ms |
+	Time for COL query: 375 | 8214ms |
+	Time for GRID query: 152 | 3089ms |
+
+filter: state = Alabama, age = 12 and 18, category = C1
+	Time for ROW query: 326 | 255ms | 
+	Time for COL query: 142 | 236ms |
+	Time for GRID query: 9 | 410ms |
