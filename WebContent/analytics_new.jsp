@@ -94,71 +94,60 @@ try
     
  String start_row = "";
  String end_row = "";
- String temp_st = "CREATE TEMPORARY TABLE users_temp AS ";
+ String temp_start = "CREATE TEMPORARY TABLE users_temp AS ";
  String temp_end = "";
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name, users_temp.state ";
  String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.name='"+category+"' GROUP BY users_temp.id, users_temp.name";
  
- startTime = System.currentTimeMillis(); 
+ startTime = System.currentTimeMillis();
+ temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
     	start_row = "SELECT users_temp.name, ";
-    	end_row = "ORDER BY users_temp.name";
+    	end_row = "ORDER BY users_temp.name asc";
     	temp_end = "ORDER BY name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
-        temp_row = conn.createStatement();
 
 	    if (!age.equals("all") && !state.equals("all")) {
             String temp5 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
-            temp_row.execute(temp_st+temp5);
+            temp_row.execute(temp_start+temp5);
         }
 	    else if (!state.equals("all")) {
 	    	String temp4 = "(SELECT * FROM users WHERE state='"+state+"'"+ temp_end;
-	        temp_row.execute(temp_st+temp4);
+	        temp_row.execute(temp_start+temp4);
 	    }
 	    else if (!age.equals("all")) {
 	        String temp2 = "(SELECT * FROM users WHERE age BETWEEN "+age + temp_end;
-	        temp_row.execute(temp_st+temp2);
+	        temp_row.execute(temp_start+temp2);
 	    }
 	    else {
 	        String temp1 = "(SELECT * FROM users " + temp_end;
-	        temp_row.execute(temp_st+temp1);
+	        temp_row.execute(temp_start+temp1);
 	    }
         row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
     }
 	else {
-//         start_row = "SELECT users_temp.state, ";
-//         end_row = "ORDER BY users_temp.state";
-//         temp_end = "ORDER BY state asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
-        
-        String state_end=" group by u.state order by u.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-        
-        String nest = " (SELECT distinct state FROM users ORDER BY state asc LIMIT 20 OFFSET "+(Integer.parseInt(rowPg)-1)*20+") ";
-        String SQL_state= "SELECT users.state, SUM(quantity * price) AS AMOUNT FROM users LEFT OUTER JOIN sales ON sales.uid = users.id WHERE users.state IN "+nest+"GROUP BY state ORDER BY state;";
-        		
-//         		"select u.state, sum(s.quantity*p.price) as amount from users_temp u, sales s,  products_temp p where s.uid=u.id and s.pid=p.id "+ state_end;
-        
 
         
+        String state_end = " group by users.state order by users.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+        String SQL_state = "SELECT users.state, SUM(quantity * price) AS AMOUNT FROM users LEFT OUTER JOIN sales ON sales.uid = users.id";
         
-        String SQL_state_state="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.state='"+state+"'"+ state_end;
         String SQL_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+ state_end;
-        String SQL_state_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s, products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"'"+ state_end;
         String SQL_state_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
-        String SQL_state_state_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.state='"+state+"'"+state_end;
-        String SQL_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and u.age between "+age+" and c.name='"+category+"'"+state_end;
-        String SQL_state_state_age_prod="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p, categories c where s.uid=u.id and s.pid=p.id and p.cid=c.id and c.name='"+category+"' and u.age between "+age+" and u.state='"+state+"'"+state_end;
         
         if (!state.equals("all") && !age.equals("all")) {
             row_rs=row_stmt.executeQuery(SQL_state_state_age);
         }
         else if (!state.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_state);
+        	String temp_state = "CREATE TEMPORARY TABLE temp_state AS (SELECT id, state FROM users WHERE state='"+state+"');";
+        	temp_row.execute(temp_state);
+        	String SQL_state1 = "SELECT state, SUM(quantity * price) AS AMOUNT FROM temp_state JOIN sales ON sales.uid = temp_state.id GROUP BY state;";
+            row_rs=row_stmt.executeQuery(SQL_state1);
         }
         else if (!age.equals("all")) {
             row_rs=row_stmt.executeQuery(SQL_state_age);
         }
         else {
-            row_rs=row_stmt.executeQuery(SQL_state);
+            row_rs=row_stmt.executeQuery(SQL_state+state_end);
         }
         
     }
@@ -255,11 +244,11 @@ if (showDashboard) { %>
         <%
         
         Statement stmtCategory = conn.createStatement();
-        ResultSet rsCategory=stmtCategory.executeQuery("SELECT name FROM categories");
+        ResultSet rsCategory=stmtCategory.executeQuery("SELECT id FROM categories");
         ArrayList<String> categoryDrop = new ArrayList<String>();
         categoryDrop.add("all");
         while (rsCategory.next()) {
-            categoryDrop.add(rsCategory.getString("name")); }  %>
+            categoryDrop.add(""+rsCategory.getInt("id")); }  %>
 
         <tr>
             <td>Category:</td>
