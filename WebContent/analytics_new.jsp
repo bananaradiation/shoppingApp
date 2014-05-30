@@ -326,11 +326,11 @@ for(i=0;i<p_list.size();i++) {
 
 startTime = System.currentTimeMillis();
 String tabOff, tabsql, productname;
-int[] tabOffset = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+//int[] tabOffset = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 if(request.getParameter("tableOffset0") != null)
 {
 	for (int off=0;off<20;off++) {
-		tabOffset[off] = Integer.parseInt(request.getParameter("tableOffset"+off));
+		//tabOffset[off] = Integer.parseInt(request.getParameter("tableOffset"+off));
 	}
 }
 
@@ -395,7 +395,7 @@ for(i=0; i<s_list.size(); i++)
 
     tabsql = tabsql + "GROUP BY p.name, u.state "+
 			"ORDER BY p.name "+
-			"LIMIT 20 OFFSET " + tabOffset[i] + ";";
+			"LIMIT 10; ";// OFFSET " + tabOffset[i] + ";";
 			
 	grid_rs = grid_stmt.executeQuery(tabsql);
 	boolean flag = grid_rs.next();
@@ -409,7 +409,7 @@ for(i=0; i<s_list.size(); i++)
 				{
 					amount=grid_rs.getFloat(2);
 		            out.print("<td><font color='#0000ff'>"+amount+"</font></td>");
-		            tabOffset[i]++;
+		            //tabOffset[i]++;
 		            flag = grid_rs.next();
 				}
 				else
@@ -443,26 +443,7 @@ System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
                 name="state" value="<%=state %>" /> <input type="hidden"
                 name="category" value="<%=category %>" /> <input type="hidden"
                 name="option" value="<%=option %>" />
-          <input type="hidden" name="tableOffset0" value=<%=tabOffset[0]%> />
-          <input type="hidden" name="tableOffset1" value=<%=tabOffset[1]%> />
-          <input type="hidden" name="tableOffset2" value=<%=tabOffset[2]%> />
-          <input type="hidden" name="tableOffset3" value=<%=tabOffset[3]%> />
-          <input type="hidden" name="tableOffset4" value=<%=tabOffset[4]%> />
-          <input type="hidden" name="tableOffset5" value=<%=tabOffset[5]%> />
-          <input type="hidden" name="tableOffset6" value=<%=tabOffset[6]%> />
-          <input type="hidden" name="tableOffset7" value=<%=tabOffset[7]%> />
-          <input type="hidden" name="tableOffset8" value=<%=tabOffset[8]%> />
-          <input type="hidden" name="tableOffset9" value=<%=tabOffset[9]%> />
-          <input type="hidden" name="tableOffset10" value=<%=tabOffset[10]%> />
-          <input type="hidden" name="tableOffset11" value=<%=tabOffset[11]%> />
-          <input type="hidden" name="tableOffset12" value=<%=tabOffset[12]%> />
-          <input type="hidden" name="tableOffset13" value=<%=tabOffset[13]%> />
-          <input type="hidden" name="tableOffset14" value=<%=tabOffset[14]%> />
-          <input type="hidden" name="tableOffset15" value=<%=tabOffset[15]%> />
-          <input type="hidden" name="tableOffset16" value=<%=tabOffset[16]%> />
-          <input type="hidden" name="tableOffset17" value=<%=tabOffset[17]%> />
-          <input type="hidden" name="tableOffset18" value=<%=tabOffset[18]%> />
-          <input type="hidden" name="tableOffset19" value=<%=tabOffset[19]%> />
+          
           
             </td>
     </form>
@@ -482,26 +463,7 @@ System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
             name="state" value="<%=state %>" /> <input type="hidden"
             name="category" value="<%=category %>" /> <input type="hidden"
             name="option" value="<%=option %>" />
-        <input type="hidden" name="tableOffset0" value=<%=tabOffset[0]%> />
-          <input type="hidden" name="tableOffset1" value=<%=tabOffset[1]%> />
-          <input type="hidden" name="tableOffset2" value=<%=tabOffset[2]%> />
-          <input type="hidden" name="tableOffset3" value=<%=tabOffset[3]%> />
-          <input type="hidden" name="tableOffset4" value=<%=tabOffset[4]%> />
-          <input type="hidden" name="tableOffset5" value=<%=tabOffset[5]%> />
-          <input type="hidden" name="tableOffset6" value=<%=tabOffset[6]%> />
-          <input type="hidden" name="tableOffset7" value=<%=tabOffset[7]%> />
-          <input type="hidden" name="tableOffset8" value=<%=tabOffset[8]%> />
-          <input type="hidden" name="tableOffset9" value=<%=tabOffset[9]%> />
-          <input type="hidden" name="tableOffset10" value=<%=tabOffset[10]%> />
-          <input type="hidden" name="tableOffset11" value=<%=tabOffset[11]%> />
-          <input type="hidden" name="tableOffset12" value=<%=tabOffset[12]%> />
-          <input type="hidden" name="tableOffset13" value=<%=tabOffset[13]%> />
-          <input type="hidden" name="tableOffset14" value=<%=tabOffset[14]%> />
-          <input type="hidden" name="tableOffset15" value=<%=tabOffset[15]%> />
-          <input type="hidden" name="tableOffset16" value=<%=tabOffset[16]%> />
-          <input type="hidden" name="tableOffset17" value=<%=tabOffset[17]%> />
-          <input type="hidden" name="tableOffset18" value=<%=tabOffset[18]%> />
-          <input type="hidden" name="tableOffset19" value=<%=tabOffset[19]%> />
+        
         </td>
     </form>
     <form action="analytics_new.jsp" method="GET">
