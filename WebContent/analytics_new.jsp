@@ -102,7 +102,7 @@ try
  String temp_end = "";
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name, users_temp.state ";
- String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.id="+category+" GROUP BY users_temp.id, users_temp.name";
+ String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.id="+category+" GROUP BY users_temp.id, users_temp.name ";
  
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
@@ -127,13 +127,24 @@ try
 	        String temp1 = "(SELECT * FROM users " + temp_end;
 	        temp_row.execute(temp_start+temp1);
 	    }
-        row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
+	    if(category != 0)
+	    {
+        	row_rs=row_stmt.executeQuery(start_row+/*sql_base*/sql_prod+end_row);
+	    }
+	    else
+	    {
+	    	row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
+	    }
     }
 	else {
 
         
-        String state_end = " group by users.state order by users.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-        String SQL_state = "SELECT users.state, SUM(quantity * price) AS AMOUNT FROM users LEFT OUTER JOIN sales ON sales.uid = users.id";
+        String state_end = " group by u.state order by u.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+        if(category != 0)
+        {
+        	state_end = " AND p.cid="+category+state_end;
+        }
+        String SQL_state = "SELECT u.state, SUM(quantity * p.price) AS AMOUNT FROM products p, users u LEFT OUTER JOIN sales ON sales.uid = u.id WHERE sales.pid = p.id ";
         
         String SQL_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+ state_end;
         String SQL_state_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
@@ -346,7 +357,7 @@ for(i=0; i<s_list.size(); i++)
 //             "WHERE p.id = s.pid AND u.id = s.uid AND categories.id = p.cid"
     
             
-    String nested_where = "(SELECT c.id FROM categories c WHERE c.id = "+category+") ";
+    //String nested_where = "(SELECT c.id FROM categories c WHERE c.id = "+category+") ";
     
     if( category != 0 ) {
 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
@@ -365,7 +376,7 @@ for(i=0; i<s_list.size(); i++)
     	            "WHERE p.id = s.pid AND u.id = s.uid ";
             tabsql = tabsql + "AND u.state = '"+s_name+"' ";
         }    
-		tabsql = tabsql + "AND p.cid IN " + nested_where;
+		tabsql = tabsql + "AND p.cid = " + category;
 	}
 	else {
 		tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
