@@ -74,9 +74,7 @@ ResultSet row_rs=null, col_rs=null, grid_rs=null;
 try
 {
     try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-<<<<<<< HEAD
     String url="jdbc:postgresql://localhost/cse135test";
->>>>>>> 3243ad740de2ce1a6b79708ec6b21cd3e4c44a82
     String user="postgres";
     String password="postgres";
     conn = DriverManager.getConnection(url, user, password);
@@ -109,13 +107,11 @@ try
  String temp = "";
  String temp_end = "";
 
-<<<<<<< HEAD
 
  //String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
  String sql_base = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id) AS s ON users_temp.id = s.uid GROUP BY users_temp.id, users_temp.name ";
  //  String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
  String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
->>>>>>> 3243ad740de2ce1a6b79708ec6b21cd3e4c44a82
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
@@ -123,20 +119,16 @@ try
     	end_row = " ORDER BY users_temp.name asc";
     	temp_end = " ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
     	
-<<<<<<< HEAD
 
     	if (!age.equals("all") && !state.equals("all") && category != 0) {
     	    temp = "(SELECT users.name, users.id, users.state, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE age between "+age+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
->>>>>>> 3243ad740de2ce1a6b79708ec6b21cd3e4c44a82
             }
     	else if (!state.equals("all") && category != 0) {
 	        temp = "(SELECT users.name, users.id, users.age, users.state FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
-<<<<<<< HEAD
 
     	else if (!age.equals("all") && category != 0) {
     	    temp = "(SELECT users.name, users.id, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
->>>>>>> 3243ad740de2ce1a6b79708ec6b21cd3e4c44a82
         }
     	else if (!age.equals("all") && !state.equals("all")) {
             temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
