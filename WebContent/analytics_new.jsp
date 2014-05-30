@@ -121,10 +121,10 @@ try
     	    temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
             }
     	else if (!state.equals("all") && category !=0) {
-	        temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+	        temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
     	else if (!age.equals("all") && category !=0) {
-    	    temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+    	    temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
     	else if (!age.equals("all") && !state.equals("all")) {
             temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
@@ -143,12 +143,12 @@ try
 	    }
     	temp_row.execute(temp_start+temp);
 	    
-//     	if(category != 0) {
-//         	row_rs=row_stmt.executeQuery(start_row+sql_prod+end_row);
-// 	    }
-// 	    else {
+    	if(category != 0) {
+        	row_rs=row_stmt.executeQuery(start_row+sql_prod+end_row);
+	    }
+	    else {
 	    	row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-// 	    }
+	    }
 
 	}
 	else {
