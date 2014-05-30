@@ -108,27 +108,25 @@ try
  String temp_end = "";
 
 
- //String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
- String sql_base = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id) AS s ON users_temp.id = s.uid GROUP BY users_temp.id, users_temp.name ";
- //  String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
- String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
- startTime = System.currentTimeMillis();
+ String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
+
+ String sql_prod = "SUM(s.quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id WHERE p.cid ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name";
+
+startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
     	start_row = "SELECT users_temp.name, ";
     	end_row = " ORDER BY users_temp.name asc";
     	temp_end = " ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
     	
-
     	if (!age.equals("all") && !state.equals("all") && category != 0) {
-    	    temp = "(SELECT users.name, users.id, users.state, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE age between "+age+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
-            }
+    	    temp = "(SELECT users.name, users.id, users.state, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id WHERE age between "+age+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+    	}
     	else if (!state.equals("all") && category != 0) {
-	        temp = "(SELECT users.name, users.id, users.age, users.state FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+	        temp = "(SELECT users.name, users.id, users.age, users.state FROM users LEFT OUTER JOIN sales ON sales.uid = users.id WHERE state= '"+state+"' GROUP BY users.id, users.name "+temp_end;   
         }
-
     	else if (!age.equals("all") && category != 0) {
-    	    temp = "(SELECT users.name, users.id, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id WHERE age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+    	    temp = "(SELECT users.name, users.id, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id WHERE age between "+age+" GROUP BY users.id, users.name"+temp_end;
         }
     	else if (!age.equals("all") && !state.equals("all")) {
             temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
@@ -140,13 +138,17 @@ try
 	        temp = "(SELECT * FROM users WHERE age BETWEEN "+age + temp_end;
 	    }
 	    else if (category != 0) {
-	    	temp = "(SELECT users.name, users.id, users.age FROM users LEFT OUTER JOIN sales ON sales.uid = users.id LEFT OUTER JOIN products ON sales.pid=products.id GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+	    	temp = "(SELECT s.price, u.id, u.name, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN users u ON u.id=s.uid WHERE p.cid ="+category+" GROUP BY u.id,u.name, s.price, s.quantity) ";	
+	    	start_row = "SELECT users.name, ";
+	    	sql_prod = "SUM(users_temp.quantity * users_temp.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN users ON users.id=users_temp.id group by users.name order by users.name asc";
+// 	    	end_row = "GROUP BY users.name ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
+	    	   end_row="";
 	    }
 	    else {
 	        temp = "(SELECT * FROM users " + temp_end;
 	    }
     	temp_row.execute(temp_start+temp);
-	    
+    	System.out.println("temp");
     	if(category != 0) {
         	row_rs=row_stmt.executeQuery(start_row+sql_prod+end_row);
 	    }
@@ -162,12 +164,13 @@ try
         	state_end = " AND p.cid="+category+state_end;
         }
         String SQL_state = "SELECT u.state, SUM(quantity * sales.price) AS AMOUNT FROM "+nest_st+" AS s JOIN users u ON u.state=s.state LEFT OUTER JOIN sales ON sales.uid = u.id";
-        String SQL_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+ state_end;
+        String SQL_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age ;
         String SQL_state_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+" and u.state='"+state+"' group by u.state;";
-        String SQL_state_prod= "SELECT u.state, sum(sales.quantity*sales.price) as amount FROM users u JOIN sales ON sales.uid = u.id JOIN products p ON sales.pid=p.id";
+        String SQL_state_prod= "SELECT u.state, sum(sales.quantity*sales.price) as amount FROM users u JOIN sales ON sales.uid = u.id JOIN products p ON sales.pid=p.id ";
         String SQL_state_state_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.state='"+state+"'";
         String SQL_state_age_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.age between "+age;
         String SQL_state_state_age_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'";
+        String SQL_state_state = "SELECT state, SUM(quantity * price) AS AMOUNT FROM users u LEFT OUTER JOIN sales ON sales.uid = u.id WHERE state = '"+state+"' ";
         
         if (!state.equals("all") && !age.equals("all") && category !=0) {
             row_rs=row_stmt.executeQuery(SQL_state_state_age_prod+state_end);
@@ -182,16 +185,13 @@ try
             row_rs=row_stmt.executeQuery(SQL_state_state_prod+state_end);
         }
         else if (!state.equals("all")) {
-        	String temp_state = "CREATE TEMPORARY TABLE temp_state AS (SELECT id, state FROM users WHERE state='"+state+"');";
-        	temp_row.execute(temp_state);
-        	String SQL_state1 = "SELECT state, SUM(quantity * price) AS AMOUNT FROM temp_state JOIN sales ON sales.uid = temp_state.id GROUP BY state;";
-            row_rs=row_stmt.executeQuery(SQL_state1);
+        	row_rs=row_stmt.executeQuery(SQL_state_state+state_end);
         }
         else if (!age.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_age);
+            row_rs=row_stmt.executeQuery(SQL_state_age+state_end);
         }
         else if (category !=0) {
-            row_rs=row_stmt.executeQuery(SQL_state_prod);
+            row_rs=row_stmt.executeQuery(SQL_state_prod+state_end);
         }
         else {
             row_rs=row_stmt.executeQuery(SQL_state+state_end);
