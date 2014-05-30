@@ -13,7 +13,8 @@ long startTime=0, finishTime=0;
 // Parameter passing
     String option = (String)request.getParameter("option");
     String state = (String)request.getParameter("state");
-    String category = (String)request.getParameter("category");
+    String categoryP = (String)request.getParameter("category");
+    int category = 0;
     String age = (String)request.getParameter("age");
     String rowPg = (String)request.getParameter("rowPage");
     String colPg = (String)request.getParameter("colPage");
@@ -23,8 +24,11 @@ long startTime=0, finishTime=0;
     if (state == null) {
         state = "all";
     }
-    if (category == null) {
-        category = "all";
+    if (categoryP != null) {
+        category = Integer.parseInt(categoryP);
+    }
+    else {
+    	categoryP = "all";
     }
     if (age == null) {
         age = "all";
@@ -98,7 +102,7 @@ try
  String temp_end = "";
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name, users_temp.state ";
- String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.name='"+category+"' GROUP BY users_temp.id, users_temp.name";
+ String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.id="+category+" GROUP BY users_temp.id, users_temp.name";
  
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
@@ -155,12 +159,12 @@ try
     System.out.println("Time for ROW query: " + (finishTime-startTime));
     
     String prod_temp1 = "CREATE TEMPORARY TABLE products_temp AS (SELECT * FROM products ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
-    String prod_temp2 = "CREATE TEMPORARY TABLE products_temp AS (SELECT products.name, products.id, products.cid, products.price FROM products JOIN categories ON products.cid=categories.id WHERE categories.name='"+category+"' ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
+    String prod_temp2 = "CREATE TEMPORARY TABLE products_temp AS (SELECT products.name, products.id, products.cid, products.price FROM products JOIN categories ON products.cid=categories.id WHERE categories.id="+category+" ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
     Statement temp_prod_stmt=conn.createStatement();
     String sql_prod_base = "SELECT products_temp.name, SUM(sales.quantity * sales.price) AS AMOUNT FROM products_temp LEFT OUTER JOIN sales ON sales.pid = products_temp.id GROUP BY products_temp.id, products_temp.name ORDER BY products_temp.name;";
 
     startTime = System.currentTimeMillis();
-    if (!category.equals("all")) {
+    if (category != 0) {
         temp_prod_stmt.execute(prod_temp2);
     }
     else {
@@ -244,19 +248,24 @@ if (showDashboard) { %>
         <%
         
         Statement stmtCategory = conn.createStatement();
-        ResultSet rsCategory=stmtCategory.executeQuery("SELECT id FROM categories");
-        ArrayList<String> categoryDrop = new ArrayList<String>();
-        categoryDrop.add("all");
+        ResultSet rsCategory=stmtCategory.executeQuery("SELECT name, id FROM categories");
+        ArrayList<String> categoryDropS = new ArrayList<String>();
+        ArrayList<Integer> categoryDrop = new ArrayList<Integer>();
+        categoryDropS.add("all");
+        categoryDrop.add(0);
         while (rsCategory.next()) {
-            categoryDrop.add(""+rsCategory.getInt("id")); }  %>
-
+            categoryDropS.add(rsCategory.getString("name"));
+            categoryDrop.add(rsCategory.getInt("id"));
+        }  
+        categoryP = categoryDropS.get(category); %>
+		
         <tr>
             <td>Category:</td>
             <td><select name="category">
-                    <option value="<%=category %>"><%=category %></option>
+                    <option value="<%=category %>"><%=categoryP %></option>
                     <% for (j = 0; j < categoryDrop.size(); j++) { 
                if (!categoryDrop.get(j).equals(category)) { %>
-                    <option value="<%= categoryDrop.get(j)%>"><%= categoryDrop.get(j)%></option>
+                    <option value="<%= categoryDrop.get(j)%>"><%= categoryDropS.get(j)%></option>
                     <% } } %>
             </select></td>
         </tr>
@@ -337,12 +346,12 @@ for(i=0; i<s_list.size(); i++)
 //             "WHERE p.id = s.pid AND u.id = s.uid AND categories.id = p.cid"
     
             
-    String nested_where = "(SELECT c.id FROM categories c WHERE c.name = '"+category+"') ";
+    String nested_where = "(SELECT c.id FROM categories c WHERE c.id = "+category+") ";
     
-    if(!category.equals("all")) {
+    if( category != 0 ) {
 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
      "FROM sales s, products_temp p, users_temp u, categories c "+
-     "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid AND c.name = '"+category+"'" ;
+     "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid AND c.id = "+category+"" ;
 
 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
 	            "FROM sales s, products_temp p, users_temp u "+
