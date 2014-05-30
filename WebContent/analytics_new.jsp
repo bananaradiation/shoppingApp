@@ -40,20 +40,6 @@ long startTime=0, finishTime=0;
         colPg = "1";
     }
 
-String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
-           "California","Colorado","Connecticut","Delaware","Florida","Georgia",
-           "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
-           "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
-           "Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire",
-           "New Jersey","New Mexico","New York","North Carolina","North Dakota",
-           "Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
-           "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
-           "Virginia","Washington","West Virginia","Wisconsin","Wyoming"};
-ArrayList<String> states = new ArrayList<String>();
-for (int i = 0; i < 50; i++) {
-    states.add(stateList[i]);
-}
-
 class Item {
     private int id=0;
     private String name=null;
@@ -95,62 +81,101 @@ try
     row_stmt = conn.createStatement();
     col_stmt = conn.createStatement();
     grid_stmt = conn.createStatement();
+    Statement st = conn.createStatement();
+    
+    String stateList[] = {"Alabama","Alaska","Arizona","Arkansas",
+            "California","Colorado","Connecticut","Delaware","Florida","Georgia",
+            "Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky",
+            "Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
+            "Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire",
+            "New Jersey","New Mexico","New York","North Carolina","North Dakota",
+            "Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+            "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+            "Virginia","Washington","West Virginia","Wisconsin","Wyoming"};
+    ArrayList<String> states = new ArrayList<String>();
+    states.add("all");
+    for (int i = 0; i < 50; i++) {
+        states.add(stateList[i]);
+//         st.executeUpdate("insert into states values ('"+stateList[i]+"')");
+//         System.out.println("insert state" + stateList[i]);
+    }
+
     
  String start_row = "";
  String end_row = "";
  String temp_start = "CREATE TEMPORARY TABLE users_temp AS ";
+ String temp = "";
  String temp_end = "";
 
- String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name, users_temp.state ";
- String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id JOIN products ON sales.pid=products.id JOIN categories ON categories.id=products.cid WHERE categories.id="+category+" GROUP BY users_temp.id, users_temp.name ";
- 
+ String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
+ String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
+//  String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
     	start_row = "SELECT users_temp.name, ";
-    	end_row = "ORDER BY users_temp.name asc";
-    	temp_end = "ORDER BY name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
-
-	    if (!age.equals("all") && !state.equals("all")) {
-            String temp5 = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
-            temp_row.execute(temp_start+temp5);
+    	end_row = " ORDER BY users_temp.name asc";
+    	temp_end = " ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
+    	
+    	if (!age.equals("all") && !state.equals("all") && category !=0) {
+	        temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
+	    }
+    	else if (!state.equals("all") && category !=0) {
+	        temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+        }
+    	else if (!age.equals("all") && category !=0) {
+    	    temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+        }
+    	else if (!age.equals("all") && !state.equals("all")) {
+            temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
         }
 	    else if (!state.equals("all")) {
-	    	String temp4 = "(SELECT * FROM users WHERE state='"+state+"'"+ temp_end;
-	        temp_row.execute(temp_start+temp4);
+	    	temp = "(SELECT * FROM users WHERE state='"+state+"'"+ temp_end;
 	    }
 	    else if (!age.equals("all")) {
-	        String temp2 = "(SELECT * FROM users WHERE age BETWEEN "+age + temp_end;
-	        temp_row.execute(temp_start+temp2);
+	        temp = "(SELECT * FROM users WHERE age BETWEEN "+age + temp_end;
+	    }
+	    else if (category != 0) {
+	    	temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
 	    }
 	    else {
-	        String temp1 = "(SELECT * FROM users " + temp_end;
-	        temp_row.execute(temp_start+temp1);
+	        temp = "(SELECT * FROM users " + temp_end;
 	    }
-	    if(category != 0)
-	    {
-        	row_rs=row_stmt.executeQuery(start_row+/*sql_base*/sql_prod+end_row);
-	    }
-	    else
-	    {
+    	temp_row.execute(temp_start+temp);
+	    
+//     	if(category != 0) {
+//         	row_rs=row_stmt.executeQuery(start_row+sql_prod+end_row);
+// 	    }
+// 	    else {
 	    	row_rs=row_stmt.executeQuery(start_row+sql_base+end_row);
-	    }
-    }
-	else {
+// 	    }
 
-        
-        String state_end = " group by u.state order by u.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
-        if(category != 0)
-        {
+	}
+	else {
+	    String nest_st = " (SELECT state FROM states ORDER BY state ASC LIMIT 20 OFFSET 0) ";
+		String state_end = " group by u.state order by u.state asc limit 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+";";
+        if(category != 0) {
         	state_end = " AND p.cid="+category+state_end;
         }
-        String SQL_state = "SELECT u.state, SUM(quantity * p.price) AS AMOUNT FROM products p, users u LEFT OUTER JOIN sales ON sales.uid = u.id WHERE sales.pid = p.id ";
+        String SQL_state = "SELECT u.state, SUM(quantity * sales.price) AS AMOUNT FROM "+nest_st+" AS s JOIN users u ON u.state=s.state LEFT OUTER JOIN sales ON sales.uid = u.id";
+        String SQL_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+ state_end;
+        String SQL_state_state_age="select u.state, sum(s.quantity*s.price) as amount from users u, sales s where s.uid=u.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
+        String SQL_state_prod= "SELECT u.state, sum(sales.quantity*sales.price) as amount FROM users u JOIN sales ON sales.uid = u.id JOIN products p ON sales.pid=p.id";
+        String SQL_state_state_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.state='"+state+"'";
+        String SQL_state_age_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s, products p where s.uid=u.id and s.pid=p.id and u.age between "+age;
+        String SQL_state_state_age_prod="select u.state, sum(s.quantity*s.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'";
         
-        String SQL_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+ state_end;
-        String SQL_state_state_age="select u.state, sum(s.quantity*p.price) as amount from users u, sales s,  products p where s.uid=u.id and s.pid=p.id and u.age between "+age+" and u.state='"+state+"'"+ state_end;
-        
-        if (!state.equals("all") && !age.equals("all")) {
-            row_rs=row_stmt.executeQuery(SQL_state_state_age);
+        if (!state.equals("all") && !age.equals("all") && category !=0) {
+            row_rs=row_stmt.executeQuery(SQL_state_state_age_prod+state_end);
+        }
+        else if (!state.equals("all") && !age.equals("all")) {
+            row_rs=row_stmt.executeQuery(SQL_state_state_age+state_end);
+        }
+        else if (!age.equals("all") && category !=0) {
+            row_rs=row_stmt.executeQuery(SQL_state_age_prod+state_end);
+        }
+        else if (!state.equals("all") && category !=0) {
+            row_rs=row_stmt.executeQuery(SQL_state_state_prod+state_end);
         }
         else if (!state.equals("all")) {
         	String temp_state = "CREATE TEMPORARY TABLE temp_state AS (SELECT id, state FROM users WHERE state='"+state+"');";
@@ -160,6 +185,9 @@ try
         }
         else if (!age.equals("all")) {
             row_rs=row_stmt.executeQuery(SQL_state_age);
+        }
+        else if (category !=0) {
+            row_rs=row_stmt.executeQuery(SQL_state_prod);
         }
         else {
             row_rs=row_stmt.executeQuery(SQL_state+state_end);
@@ -360,9 +388,9 @@ for(i=0; i<s_list.size(); i++)
     //String nested_where = "(SELECT c.id FROM categories c WHERE c.id = "+category+") ";
     
     if( category != 0 ) {
-	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
-     "FROM sales s, products_temp p, users_temp u, categories c "+
-     "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid AND c.id = "+category+"" ;
+// 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
+//      "FROM sales s, products_temp p, users_temp u, categories c "+
+//      "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid AND c.id = "+category ;
 
 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
 	            "FROM sales s, products_temp p, users_temp u "+
@@ -393,7 +421,7 @@ for(i=0; i<s_list.size(); i++)
         }
 	}
 
-    tabsql = tabsql + "GROUP BY p.name, u.state "+
+    tabsql = tabsql + "GROUP BY p.name, u.name "+
 			"ORDER BY p.name "+
 			"LIMIT 10; ";// OFFSET " + tabOffset[i] + ";";
 			
@@ -471,10 +499,10 @@ System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
         <button type="submit">Analytics Home</button></td></tr>
     </form>
 </table>
-<%
-}
+<% }
 catch(Exception e) { 
-    out.println(e.getMessage()); }
+    out.println(e.getMessage()); 
+    }
 finally {
     System.out.println("End query");
     conn.close(); 
