@@ -369,29 +369,9 @@ for(i=0; i<s_list.size(); i++)
 //     displays row aggregation headers in grid
     out.println("<tr  align=\"center\">");
     out.println("<td><strong>"+s_name+" ("+s_amount_price+")</strong></td>");   
-   
 
-    
-    
-    
-//  original sql
-// 	tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
-// 			"FROM sales s, products_temp p, users_temp u, categories c "+
-// 			"WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid ";
-			
-    //nested sql in FROM clause
-// 	tabsql = "SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
-//             "FROM sales s, products_temp p, users_temp u, (SELECT * FROM categories c WHERE c.name = '"+category+"') cat" +
-//             "WHERE p.id = s.pid AND u.id = s.uid AND categories.id = p.cid"
-    
-            
-    //String nested_where = "(SELECT c.id FROM categories c WHERE c.id = "+category+") ";
-    
     if( category != 0 ) {
-// 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount, p.id as prodID "+
-//      "FROM sales s, products_temp p, users_temp u, categories c "+
-//      "WHERE p.id = s.pid AND u.id = s.uid AND c.id = p.cid AND c.id = "+category ;
-
+        
 	    tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
 	            "FROM sales s, products_temp p, users_temp u "+
 	            "WHERE p.id = s.pid AND u.id = s.uid ";
@@ -405,6 +385,13 @@ for(i=0; i<s_list.size(); i++)
             tabsql = tabsql + "AND u.state = '"+s_name+"' ";
         }    
 		tabsql = tabsql + "AND p.cid = " + category;
+		if (!age.equals("all")) {
+			tabsql = tabsql + "AND age between " + age;
+		}
+		if (!state.equals("all")) {
+			tabsql = tabsql + "AND state = '"+state+"'";
+		}
+		
 	}
 	else {
 		tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
@@ -418,6 +405,12 @@ for(i=0; i<s_list.size(); i++)
 		            "FROM sales s, products_temp p, users u "+
 		            "WHERE p.id = s.pid AND u.id = s.uid ";
             tabsql = tabsql+ "AND u.state = '"+s_name+"' ";
+        }
+		if (!age.equals("all")) {
+            tabsql = tabsql + "AND age between " + age;
+        }
+        if (!state.equals("all")) {
+            tabsql = tabsql + "AND state = '"+state+"'";
         }
 	}
 
