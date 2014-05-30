@@ -4,8 +4,6 @@ DROP TABLE products CASCADE;
 DROP TABLE carts CASCADE;
 DROP TABLE sales CASCADE;
 
-
-/**table 1: [entity] users**/
 CREATE TABLE users (
     id          SERIAL PRIMARY KEY,
     name        TEXT NOT NULL UNIQUE,
@@ -14,14 +12,12 @@ CREATE TABLE users (
     state  		TEXT NOT NULL
 );
 
-/**table 2: [entity] category**/
 CREATE TABLE categories (
     id          SERIAL PRIMARY KEY,
     name        TEXT NOT NULL UNIQUE,
     description TEXT
 );
 
-/**table 3: [entity] product**/
 CREATE TABLE products (
     id          SERIAL PRIMARY KEY,
     cid         INTEGER REFERENCES categories (id) ON DELETE CASCADE,
@@ -30,7 +26,6 @@ CREATE TABLE products (
     price       INTEGER NOT NULL
 );
 
-/**table 4: [relation] carts**/
 CREATE TABLE sales (
     id          SERIAL PRIMARY KEY,
     uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
@@ -39,7 +34,6 @@ CREATE TABLE sales (
     price		INTEGER NOT NULL
 );
 
-
 CREATE TABLE carts (
     id          SERIAL PRIMARY KEY,
     uid         INTEGER REFERENCES users (id) ON DELETE CASCADE,
@@ -47,3 +41,6 @@ CREATE TABLE carts (
     quantity    INTEGER NOT NULL,
     price		INTEGER NOT NULL
 );
+CREATE TABLE states (
+    state        TEXT PRIMARY KEY,
+)
