@@ -108,8 +108,8 @@ try
  String temp_end = "";
 
  String sql_base = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id GROUP BY users_temp.id, users_temp.name";
- String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
-//  String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
+//  String sql_prod = "SUM(quantity * sales.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN sales ON sales.uid = users_temp.id OUTER JOIN products ON sales.pid=products.id WHERE products.cid="+category+" GROUP BY users_temp.id, users_temp.name ";
+ String sql_prod = "SUM(quantity * s.price) AS AMOUNT FROM users_temp LEFT OUTER JOIN (SELECT s.price, s.uid, s.quantity FROM sales s JOIN products p ON s.pid = p.id JOIN categories c ON p.cid = c.id WHERE c.id ='"+category+"') AS s ON users_temp.id = s.uid GROUP BY users_temp.name ";
  startTime = System.currentTimeMillis();
  temp_row = conn.createStatement();
     if(option.equals("customers") || option.equals("")) {
@@ -118,10 +118,10 @@ try
     	temp_end = " ORDER BY users.name asc LIMIT 20 "+"offset "+(Integer.parseInt(rowPg)-1)*20+");";
     	
     	if (!age.equals("all") && !state.equals("all") && category !=0) {
-	        temp = "(SELECT * FROM users WHERE state='"+state+"' AND age BETWEEN "+age+ temp_end;
-	    }
+    	    temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+            }
     	else if (!state.equals("all") && category !=0) {
-	        temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
+	        temp = "(SELECT users.name, users.id, users.state FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND state= '"+state+"' GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
         }
     	else if (!age.equals("all") && category !=0) {
     	    temp = "(SELECT users.name, users.id FROM users JOIN sales ON sales.uid = users.id JOIN products ON sales.pid=products.id WHERE products.cid = "+category+" AND age between "+age+" GROUP BY users.id, users.name ORDER BY name asc LIMIT 20);";
@@ -198,7 +198,7 @@ try
     System.out.println("Time for ROW query: " + (finishTime-startTime));
     
     String prod_temp1 = "CREATE TEMPORARY TABLE products_temp AS (SELECT * FROM products ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
-    String prod_temp2 = "CREATE TEMPORARY TABLE products_temp AS (SELECT products.name, products.id, products.cid, products.price FROM products JOIN categories ON products.cid=categories.id WHERE categories.id="+category+" ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
+    String prod_temp2 = "CREATE TEMPORARY TABLE products_temp AS (SELECT * FROM products WHERE products.cid="+category+" ORDER BY name asc LIMIT 10 "+"offset "+(Integer.parseInt(colPg)-1)*10+");";
     Statement temp_prod_stmt=conn.createStatement();
     String sql_prod_base = "SELECT products_temp.name, SUM(sales.quantity * sales.price) AS AMOUNT FROM products_temp LEFT OUTER JOIN sales ON sales.pid = products_temp.id GROUP BY products_temp.id, products_temp.name ORDER BY products_temp.name;";
 
@@ -384,14 +384,13 @@ for(i=0; i<s_list.size(); i++)
     	            "WHERE p.id = s.pid AND u.id = s.uid ";
             tabsql = tabsql + "AND u.state = '"+s_name+"' ";
         }    
-		tabsql = tabsql + "AND p.cid = " + category;
+		tabsql = tabsql + " AND p.cid = " + category;
 		if (!age.equals("all")) {
-			tabsql = tabsql + "AND age between " + age;
+			tabsql = tabsql + " AND age between " + age;
 		}
 		if (!state.equals("all")) {
-			tabsql = tabsql + "AND state = '"+state+"'";
+			tabsql = tabsql + " AND u.state = '"+state+"'";
 		}
-		
 	}
 	else {
 		tabsql ="SELECT p.name AS productname, sum(s.quantity * p.price) AS amount "+
@@ -407,10 +406,10 @@ for(i=0; i<s_list.size(); i++)
             tabsql = tabsql+ "AND u.state = '"+s_name+"' ";
         }
 		if (!age.equals("all")) {
-            tabsql = tabsql + "AND age between " + age;
+            tabsql = tabsql + " AND age between " + age;
         }
         if (!state.equals("all")) {
-            tabsql = tabsql + "AND state = '"+state+"'";
+            tabsql = tabsql + " AND state = '"+state+"'";
         }
 	}
 
