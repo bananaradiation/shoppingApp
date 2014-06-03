@@ -14,8 +14,8 @@ if(("Y").equals(need_to_connect_db))
 		try
 		{
 		
-	        try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-	        String url="jdbc:postgresql://localhost/cse135";
+			try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+	        String url="jdbc:postgresql://localhost/project3";
 	        String user="postgres";
 	        String password="postgres";
 			conn =DriverManager.getConnection(url, user, password);

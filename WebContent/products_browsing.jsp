@@ -25,10 +25,11 @@ if(session.getAttribute("name")!=null)
 		try
 		{
 	        try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-	        String url="jdbc:postgresql://localhost/cse135";
+	        try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+	        String url="jdbc:postgresql://localhost/project3";
 	        String user="postgres";
 	        String password="postgres";
-			conn =DriverManager.getConnection(url, user, password);
+	        conn =DriverManager.getConnection(url, user, password);
 			stmt =conn.createStatement();
 			ResultSet rs=null;
 			rs=stmt.executeQuery("SELECT * FROM categories order by id asc;");

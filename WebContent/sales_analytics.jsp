@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>CSE135</title>
+<title>project3</title>
 <script type="text/javascript" src="js/js.js" language="javascript"></script>
 </head>
 
@@ -21,11 +21,11 @@ ResultSet rs=null,rs_2=null,rs_3=null;
 String SQL=null;
 try
 {
-    try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-    String url="jdbc:postgresql://localhost/cse135";
+	try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
+    String url="jdbc:postgresql://localhost/project3";
     String user="postgres";
     String password="postgres";
-	conn =DriverManager.getConnection(url, user, password);
+    conn =DriverManager.getConnection(url, user, password);
 	stmt =conn.createStatement();
 	
 %>	

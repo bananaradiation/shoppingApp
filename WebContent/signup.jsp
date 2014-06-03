@@ -102,7 +102,7 @@ if(name!=null && age!=null && role!=null && state!=null)
 	{
 		String  SQL="INSERT INTO users (name, role, age, state) VALUES('"+name+"','"+role+"',"+age+",'"+state+"');";
         try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-        String url="jdbc:postgresql://localhost/cse135";
+        String url="jdbc:postgresql://localhost/project3";
         String user="postgres";
         String password="postgres";
 		conn =DriverManager.getConnection(url, user, password);
