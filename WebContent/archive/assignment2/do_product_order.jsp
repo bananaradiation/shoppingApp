@@ -42,9 +42,9 @@ if(session.getAttribute("name")!=null)
 					
 				
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
-					String url="jdbc:postgresql://127.0.0.1:5432/P1";
-					String user="postgres";
-					String password="880210";
+			        String url="jdbc:postgresql://localhost/cse135";
+			        String user="postgres";
+			        String password="postgres";
 					conn =DriverManager.getConnection(url, user, password);
 					stmt =conn.createStatement();
 					String  SQL="INSERT INTO carts (uid, pid, quantity,price) VALUES("+userID+", "+pid+", "+quantity+","+price+" );";
