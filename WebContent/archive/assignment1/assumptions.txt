@@ -1,5 +1,0 @@
-persistent shopping cart
-credit card has to be 16 digits
-ER diagram crow's foot notation
-model1 diagram: parameters on top of line is right arrow, parameters below line is left arrow; calling.jsp has arrow to DB if called.jsp alters DB; "irrelevant" hidden parameters (e.g. action) not shown; only one DB but used multiiple times in diagram to make it look less messy
-
