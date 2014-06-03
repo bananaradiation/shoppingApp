@@ -1,11 +1,11 @@
 CREATE TABLE customerView (
-	cid 	INTEGER PRIMARY KEY, 
+	uid 	INTEGER PRIMARY KEY, 
 	state 	TEXT NOT NULL, 
 	amt 	INTEGER
 );
-INSERT INTO customerView(CID, STATE, AMT)
-(SELECT sales.uid as CID, users.state as STATE, SUM(sales.quantity*sales.price) as AMT
-FROM sales JOIN users ON sales.uid=users.id
+INSERT INTO customerView(UID, STATE, AMT)
+(SELECT sales.uid as UID, users.state as STATE, SUM(sales.quantity*sales.price) as AMT
+FROM sales JOIN users ON SERIALes.uid=users.id
 GROUP BY sales.uid, users.state);
 
 
@@ -38,6 +38,79 @@ GROUP BY products.cid, users.state
 );
 
 
+-- product col, no filter
+SELECT prod.name, prod.total
+FROM (SELECT name, sum(amt) AS total
+FROM productView, products
+WHERE productView.pid=products.id
+GROUP BY products.id, products.name) AS prod
+ORDER BY total DESC
+LIMIT 10;
+
+-- product col, state filter
+SELECT prod.name, prod.total
+FROM (SELECT products.name, sum(amt) AS total
+FROM productView, products, users
+WHERE productView.pid=products.id AND productView.uid=users.id AND users.state='+"state"+'
+GROUP BY products.id, products.name) AS prod
+ORDER BY total DESC
+LIMIT 10;
+
+-- product col, category filter
+SELECT foo.name, foo.total
+FROM (SELECT products.name, sum(amt) AS total
+FROM productView, products
+WHERE productView.pid=products.id AND productView.cid = '+"category"+'
+GROUP BY products.id, products.name) AS prod
+ORDER BY total DESC
+LIMIT 10;
+
+
+-- -- product col, state&category filter
+SELECT name, total
+FROM (SELECT products.name, SUM(amt) AS total
+FROM productView, products, users
+WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '+"category"+' AND users.state='+"state"+'
+GROUP BY products.id, products.name) AS prod
+ORDER BY total DESC
+LIMIT 10;
+
+
+-- customer row, no filter
+SELECT users.name, sum(amt)
+FROM customerView, users
+WHERE customerView.uid=users.id
+GROUP BY users.name, amt
+ORDER BY amt DESC
+LIMIT 20;
+
+-- customer row, state filter
+SELECT users.name, SUM(amt)
+FROM customerView, users
+WHERE customerView.uid=users.id AND users.state='+"state"+'
+GROUP BY users.name, amt
+ORDER BY amt DESC
+LIMIT 20;
+
+-- customer row, category filter
+SELECT name, total
+FROM (SELECT users.name, SUM(amt) AS total
+FROM productView, users
+WHERE productView.uid=users.id AND productView.cid = '+"category"+'
+GROUP BY users.id, users.name) AS foo
+ORDER BY total DESC
+LIMIT 20
+
+-- customer row, state&category filter
+SELECT name, total
+FROM (SELECT users.name, SUM(amt) AS total
+FROM productView, users
+WHERE productView.uid=users.id AND productView.cid = '+"category"+' AND users.state='+"state"+'
+GROUP BY users.id, users.name) AS foo
+ORDER BY total DESC
+LIMIT 20
+
+
 -- state row, no filter
 SELECT state, sum(amt) 
 FROM stateView
@@ -49,4 +122,20 @@ LIMIT 20;
 SELECT state, sum(amt) 
 FROM stateView
 WHERE state = '+"state"+'
-GROUP BY state
+GROUP BY state;
+
+-- state row, category filter
+SELECT state, sum(amt)
+FROM stateView
+WHERE cid = '+"category"+'
+GROUP BY cid, state
+ORDER BY sum(amt) DESC
+LIMIT 20;
+
+-- state row, state & category filter
+SELECT state, sum(amt)
+FROM stateView
+WHERE cid = '+"category"+' AND state = '+"state"+'
+GROUP BY cid, state
+ORDER BY sum(amt) DESC
+LIMIT 20
