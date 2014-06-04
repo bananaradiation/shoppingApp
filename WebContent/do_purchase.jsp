@@ -31,7 +31,8 @@ if(session.getAttribute("name")!=null)
 	PreparedStatement pstmt = null;
 	PreparedStatement ustmt = null;
 	ResultSet rs;
-	int uid, add, pid, quantity, price;
+	int add, pid, quantity, price, cid, ret;
+	String state;
 	
 	int card_num=0;
 	try {card=request.getParameter("card"); }catch(Exception e){card=null;}
@@ -50,7 +51,8 @@ if(session.getAttribute("name")!=null)
 
 					String SQL="delete from carts where uid="+userID+";";
 					
-					String SQL_get="select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
+					//String SQL_get="select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
+					String SQL_get="select c.uid, c.pid, c.quantity, c.price, p.cid from carts c LEFT OUTER JOIN products p ON c.pid = p.id where c.uid="+userID+";";
 					String SQL_insert= "INSERT INTO sales (uid, pid, quantity, price) VALUES ("+userID+", ?, ?, ?)";
 					String SQL_updateCV="UPDATE customerView" + " "+
 										"SET amt = amt+?" + " "+
@@ -62,9 +64,16 @@ if(session.getAttribute("name")!=null)
 										
 					String SQL_updateSV="UPDATE stateView" + " "+
 										"SET amt = amt+?" + " "+
-										"WHERE state IN (SELECT state FROM users WHERE users.id = "+userID+") " +
-												"AND cid IN (SELECT cid FROM products WHERE id = ?);";
-										
+										"WHERE state = ?" + " " +
+												"AND cid = ?;";
+												
+					String SQL_insertCV = "INSERT INTO customerView (uid, state, amt) VALUES ("+userID+", ?, ?);";
+					String SQL_insertPV = "INSERT INTO productView (uid, pid, cid, amt) VALUES ("+userID+", ?, ?, ?);";
+					String SQL_insertSV = "INSERT INTO stateView (cid, state, amt) VALUES (?, ?, ?);";
+					
+					//String SQL_getcid = "SELECT cid FROM products WHERE id = ?;";
+					String SQL_getState = "SELECT state FROM users WHERE users.id = "+userID+";";
+					
 					pstmt = null;
 					ustmt = null;
 					
@@ -80,13 +89,24 @@ if(session.getAttribute("name")!=null)
 							conn.setAutoCommit(false);
 							/**record log,i.e., sales table**/
 							//stmt.execute(SQL_copy);
+							rs = stmt.executeQuery(SQL_getState);
+							rs.next();
+							state = rs.getString("state");
 							rs = stmt.executeQuery(SQL_get);
+							//state = "Kansas";
 							while(rs.next())
 							{
 								//uid = rs.getInt("uid");
 								pid = rs.getInt("pid");
 								quantity = rs.getInt("quantity");
 								price = rs.getInt("price");
+								cid = rs.getInt("cid");
+								//pstmt = conn.prepareStatement(SQL_getcid);
+								//pstmt.setInt(1, pid);
+								//ts = pstmt.executeQuery();
+								//ts.next();
+								//cid = ts.getInt("cid");
+								
 								pstmt = conn.prepareStatement(SQL_insert);
 								//pstmt.setInt(1, uid);
 								pstmt.setInt(1, pid);
@@ -99,19 +119,40 @@ if(session.getAttribute("name")!=null)
 								ustmt = conn.prepareStatement(SQL_updateCV);
 								ustmt.setInt(1, add);
 								//ustmt.setInt(2, uid);
-								ustmt.executeUpdate();
+								ret = ustmt.executeUpdate();
+								if(ret < 1){
+									ustmt = conn.prepareStatement(SQL_insertCV);
+									ustmt.setString(1, state);
+									ustmt.setInt(2, add);
+									ustmt.executeUpdate();
+								}
 								
 								ustmt = conn.prepareStatement(SQL_updatePV);
 								ustmt.setInt(1, add);
 								//ustmt.setInt(2, uid);
 								ustmt.setInt(2, pid);
-								ustmt.executeUpdate();
+								ret = ustmt.executeUpdate();
+								if(ret < 1){
+									ustmt = conn.prepareStatement(SQL_insertPV);
+									ustmt.setInt(1, pid);
+									ustmt.setInt(2, cid);
+									ustmt.setInt(3, add);
+									ustmt.executeUpdate();
+								}
 								
 								ustmt = conn.prepareStatement(SQL_updateSV);
 								ustmt.setInt(1, add);
+								ustmt.setString(2, state);
 								//ustmt.setInt(2, uid);
-								ustmt.setInt(2, pid);
-								ustmt.executeUpdate();
+								ustmt.setInt(3, cid);
+								ret = ustmt.executeUpdate();
+								if(ret < 1){
+									ustmt = conn.prepareStatement(SQL_insertSV);
+									ustmt.setInt(1, cid);
+									ustmt.setString(2, state);
+									ustmt.setInt(3, add);
+									ustmt.executeUpdate();
+								}
 							}
 							
 							stmt.execute(SQL);
@@ -124,7 +165,7 @@ if(session.getAttribute("name")!=null)
 					catch(Exception e)
 					{
 						out.println("Fail! Please try again <a href=\"purchase.jsp\" target=\"_self\">Purchase page</a>.<br><br>");
-						
+						e.printStackTrace();
 					}
 					conn.close();
 				}
