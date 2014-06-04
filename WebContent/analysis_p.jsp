@@ -211,7 +211,7 @@ try
     }
     PreparedStatement pstmt = conn.prepareStatement(SQL_grid);
     ResultSet grid_rs;
-    for (int r=0; r<20; r++) {
+    for (int r=0; r<rowTotal.size(); r++) {
     	grid_rs = null;
     	if (!option.equals("states")) {
     		pstmt.setInt(2,rowId.get(r));
@@ -222,7 +222,7 @@ try
     	
     	<tr><td align="center"><strong><%=rowName.get(r) %> (<%=rowTotal.get(r) %>)</strong></td>
     	<%
-    	for (int g=0; g<10; g++) {
+    	for (int g=0; g<colId.size(); g++) {
     		pstmt.setInt(1, colId.get(g));
     		grid_rs = pstmt.executeQuery();
     		if (grid_rs.next()) { %>
@@ -235,7 +235,6 @@ try
     		}
     	}
     }
-
 finishTime = System.currentTimeMillis();
 System.out.println("Time for GRID query: " + (finishTime-startTime)); %>
     

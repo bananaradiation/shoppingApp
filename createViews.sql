@@ -5,10 +5,9 @@ CREATE TABLE customerView (
 );
 INSERT INTO customerView(UID, STATE, AMT)
 (SELECT sales.uid as UID, users.state as STATE, SUM(sales.quantity*sales.price) as AMT
-FROM sales JOIN users ON SERIALes.uid=users.id
+FROM sales, users
+WHERE sales.uid=users.id
 GROUP BY sales.uid, users.state);
-
-create index stateidx on customerView(state);
 
 CREATE TABLE productView (
 	id 		SERIAL PRIMARY KEY,
@@ -19,13 +18,10 @@ CREATE TABLE productView (
 );
 INSERT INTO productView(PID, UID, CID, AMT)
 (SELECT sales.pid AS PID, sales.uid AS UID, products.cid AS CID, SUM(sales.quantity*sales.price) AS AMT
-FROM sales, products, categories
-WHERE sales.pid=products.id AND products.cid=categories.id
+FROM sales, products
+WHERE sales.pid=products.id
 GROUP BY sales.pid, sales.uid, products.cid
 );
-create index pididx on productView(pid);
-create index uid on productView(uid);
-create index cid on productView(cid);
 
 CREATE TABLE stateView(
 	id		SERIAL PRIMARY KEY,
@@ -39,8 +35,12 @@ FROM users, sales, products
 WHERE users.id=sales.uid AND products.id=sales.pid
 GROUP BY products.cid, users.state
 );
-create index cididx on stateView(cid);
 
+create index cididx on stateView(cid);
+create index pididx on productView(pid);
+create index uid on productView(uid);
+create index cid on productView(cid);
+create index stateidx on customerView(state);
 
 -- grid (filters already done on row/cols)
 -- customer
@@ -88,8 +88,7 @@ GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
 
-
--- -- product col, state&category filter
+-- product col, state&category filter
 SELECT name, prod.id, total
 FROM (SELECT products.name, products.id, SUM(amt) AS total
 FROM productView, products, users
@@ -97,7 +96,6 @@ WHERE productView.pid=products.id AND productView.uid=users.id AND productView.c
 GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
-
 
 -- customer row, no filter
 SELECT users.name, users.id, SUM(amt)
@@ -132,7 +130,6 @@ WHERE productView.uid=users.id AND productView.cid = '+"category"+' AND users.st
 GROUP BY users.id, users.name) AS foo
 ORDER BY total DESC
 LIMIT 20;
-
 
 -- state row, no filter
 SELECT state, sum(amt) 

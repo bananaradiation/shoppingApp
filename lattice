@@ -1,0 +1,16 @@
+sales(uid, pid, quantity, price) ---> productView(pid, uid, cid, amt)
+       |										|
+       |										|
+       |join users on users.id=productView.uid	|
+       |										|
+       V										|
+customerView(uid, state, amt)					|join users on users.id=productView.uid
+                                                | 
+                                                |
+                                                |
+                                                |
+                                                V
+                                        stateView(state, cid, amt)
+
+
+

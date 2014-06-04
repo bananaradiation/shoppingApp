@@ -1,0 +1,39 @@
+customer, no filter
+Time for ROW query: 37
+Time for COL query: 468
+Time for GRID query: 645
+
+customer, state filter
+Time for ROW query: 8
+Time for COL query: 138
+Time for GRID query: 291
+
+customer, category filter
+Time for ROW query: 64
+Time for COL query: 33
+Time for GRID query: 398
+
+customer, both filter
+Time for ROW query: 18
+Time for COL query: 14
+Time for GRID query: 234
+
+state, no filter
+Time for ROW query: 2
+Time for COL query: 479
+Time for GRID query: 916
+
+state, state filter
+Time for ROW query: 1
+Time for COL query: 150
+Time for GRID query: 176
+
+state, category filter
+Time for ROW query: 4
+Time for COL query: 30
+Time for GRID query: 540
+
+state, both filter
+Time for ROW query: 2
+Time for COL query: 28
+Time for GRID query: 69
