@@ -39,8 +39,8 @@ GROUP BY products.cid, users.state
 
 
 -- product col, no filter
-SELECT prod.name, prod.total
-FROM (SELECT name, sum(amt) AS total
+SELECT prod.name, prod.id, prod.total
+FROM (SELECT name, products.id, SUM(amt) AS total
 FROM productView, products
 WHERE productView.pid=products.id
 GROUP BY products.id, products.name) AS prod
@@ -48,67 +48,67 @@ ORDER BY total DESC
 LIMIT 10;
 
 -- product col, state filter
-SELECT prod.name, prod.total
-FROM (SELECT products.name, sum(amt) AS total
+SELECT prod.name, prod.id, prod.total
+FROM (SELECT products.name, products.id, SUM(amt) AS total
 FROM productView, products, users
-WHERE productView.pid=products.id AND productView.uid=users.id AND users.state='+"state"+'
+WHERE productView.pid=products.id AND productView.uid=users.id AND users.state='"+state+"'
 GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
 
 -- product col, category filter
-SELECT foo.name, foo.total
-FROM (SELECT products.name, sum(amt) AS total
+SELECT prod.name, prod.id, prod.total
+FROM (SELECT products.name, products.id, SUM(amt) AS total
 FROM productView, products
-WHERE productView.pid=products.id AND productView.cid = '+"category"+'
+WHERE productView.pid=products.id AND productView.cid = '"+category+"'
 GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
 
 
 -- -- product col, state&category filter
-SELECT name, total
-FROM (SELECT products.name, SUM(amt) AS total
+SELECT name, prod.id, total
+FROM (SELECT products.name, products.id, SUM(amt) AS total
 FROM productView, products, users
-WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '+"category"+' AND users.state='+"state"+'
+WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '1' AND users.state='Alaska'
 GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
 
 
 -- customer row, no filter
-SELECT users.name, sum(amt)
+SELECT users.name, users.id, SUM(amt)
 FROM customerView, users
 WHERE customerView.uid=users.id
-GROUP BY users.name, amt
+GROUP BY users.name,users.id, amt
 ORDER BY amt DESC
 LIMIT 20;
 
 -- customer row, state filter
-SELECT users.name, SUM(amt)
+SELECT users.name, users.id, SUM(amt)
 FROM customerView, users
-WHERE customerView.uid=users.id AND users.state='+"state"+'
-GROUP BY users.name, amt
+WHERE customerView.uid=users.id AND users.state='"+state+"'
+GROUP BY users.name, users.id, amt
 ORDER BY amt DESC
 LIMIT 20;
 
 -- customer row, category filter
-SELECT name, total
-FROM (SELECT users.name, SUM(amt) AS total
+SELECT name, id, total
+FROM (SELECT users.name, users.id, SUM(amt) AS total
 FROM productView, users
-WHERE productView.uid=users.id AND productView.cid = '+"category"+'
+WHERE productView.uid=users.id AND productView.cid = '"+category+"'
 GROUP BY users.id, users.name) AS foo
 ORDER BY total DESC
-LIMIT 20
+LIMIT 20;
 
 -- customer row, state&category filter
-SELECT name, total
-FROM (SELECT users.name, SUM(amt) AS total
+SELECT name, id, total
+FROM (SELECT users.name, users.id, SUM(amt) AS total
 FROM productView, users
 WHERE productView.uid=users.id AND productView.cid = '+"category"+' AND users.state='+"state"+'
 GROUP BY users.id, users.name) AS foo
 ORDER BY total DESC
-LIMIT 20
+LIMIT 20;
 
 
 -- state row, no filter
