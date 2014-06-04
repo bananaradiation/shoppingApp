@@ -1,3 +1,9 @@
+create index p_cididx on products(cid);
+create index s_uididx on sales(uid);
+create index s_pididx on sales(pid);
+create index c_uididx on carts(uid);
+create index c_pididx on carts(pid);
+
 CREATE TABLE customerView (
 	uid 	INTEGER PRIMARY KEY, 
 	state 	TEXT NOT NULL, 
@@ -8,6 +14,7 @@ INSERT INTO customerView(UID, STATE, AMT)
 FROM sales, users
 WHERE sales.uid=users.id
 GROUP BY sales.uid, users.state);
+create index stateidx on customerView(state);
 
 CREATE TABLE productView (
 	id 		SERIAL PRIMARY KEY,
@@ -22,7 +29,10 @@ FROM sales, products
 WHERE sales.pid=products.id
 GROUP BY sales.pid, sales.uid, products.cid
 );
-
+create index pididx on productView(pid);
+create index uid on productView(uid);
+create index cid on productView(cid);
+	
 CREATE TABLE stateView(
 	id		SERIAL PRIMARY KEY,
 	state   TEXT NOT NULL,
@@ -35,12 +45,8 @@ FROM users, sales, products
 WHERE users.id=sales.uid AND products.id=sales.pid
 GROUP BY products.cid, users.state
 );
-
 create index cididx on stateView(cid);
-create index pididx on productView(pid);
-create index uid on productView(uid);
-create index cid on productView(cid);
-create index stateidx on customerView(state);
+
 
 -- grid (filters already done on row/cols)
 -- customer

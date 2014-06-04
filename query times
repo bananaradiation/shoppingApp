@@ -1,39 +1,39 @@
 customer, no filter
-Time for ROW query: 37
-Time for COL query: 468
-Time for GRID query: 645
+Time for ROW query: 618
+Time for COL query: 4830
+Time for GRID query: 6300
 
 customer, state filter
-Time for ROW query: 8
-Time for COL query: 138
-Time for GRID query: 291
+Time for ROW query: 7
+Time for COL query: 1363
+Time for GRID query: 2561
 
 customer, category filter
-Time for ROW query: 64
-Time for COL query: 33
-Time for GRID query: 398
+Time for ROW query: 518
+Time for COL query: 249
+Time for GRID query: 1636
 
 customer, both filter
-Time for ROW query: 18
-Time for COL query: 14
-Time for GRID query: 234
+Time for ROW query: 270
+Time for COL query: 138
+Time for GRID query: 1270
 
 state, no filter
-Time for ROW query: 2
-Time for COL query: 479
-Time for GRID query: 916
+Time for ROW query: 3
+Time for COL query: 4702
+Time for GRID query: 5754
 
 state, state filter
-Time for ROW query: 1
-Time for COL query: 150
-Time for GRID query: 176
+Time for ROW query: 14
+Time for COL query: 1370
+Time for GRID query: 1473
 
 state, category filter
-Time for ROW query: 4
-Time for COL query: 30
-Time for GRID query: 540
+Time for ROW query: 26
+Time for COL query: 358
+Time for GRID query: 1314
 
 state, both filter
-Time for ROW query: 2
-Time for COL query: 28
-Time for GRID query: 69
+Time for ROW query: 99
+Time for COL query: 385
+Time for GRID query: 600
