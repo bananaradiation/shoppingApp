@@ -27,6 +27,12 @@ if(session.getAttribute("name")!=null)
 	int userID  = (Integer)session.getAttribute("userID");
 	String role = (String)session.getAttribute("role");
 	String card=null;
+	
+	PreparedStatement pstmt = null;
+	PreparedStatement ustmt = null;
+	ResultSet rs;
+	int uid, add, pid, quantity, price;
+	
 	int card_num=0;
 	try {card=request.getParameter("card"); }catch(Exception e){card=null;}
 	try
@@ -40,8 +46,27 @@ if(session.getAttribute("name")!=null)
 				try
 				{
 					
-					String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
-					String  SQL="delete from carts where uid="+userID+";";
+					//String SQL_copy="INSERT INTO sales (uid, pid, quantity, price) select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
+
+					String SQL="delete from carts where uid="+userID+";";
+					
+					String SQL_get="select c.uid, c.pid, c.quantity, c.price from carts c where c.uid="+userID+";";
+					String SQL_insert= "INSERT INTO sales (uid, pid, quantity, price) VALUES ("+userID+", ?, ?, ?)";
+					String SQL_updateCV="UPDATE customerView" + " "+
+										"SET amt = amt+?" + " "+
+										"WHERE uid = "+userID+";";
+										
+					String SQL_updatePV="UPDATE productView" + " "+
+										"SET amt = amt+?" + " "+
+										"WHERE uid = "+userID+" AND pid = ?;";
+										
+					String SQL_updateSV="UPDATE stateView" + " "+
+										"SET amt = amt+?" + " "+
+										"WHERE state IN (SELECT state FROM users WHERE users.id = "+userID+") " +
+												"AND cid IN (SELECT cid FROM products WHERE id = ?);";
+										
+					pstmt = null;
+					ustmt = null;
 					
 					try{Class.forName("org.postgresql.Driver");}catch(Exception e){System.out.println("Driver error");}
 			        String url="jdbc:postgresql://localhost/project3";
@@ -54,7 +79,41 @@ if(session.getAttribute("name")!=null)
 					
 							conn.setAutoCommit(false);
 							/**record log,i.e., sales table**/
-							stmt.execute(SQL_copy);
+							//stmt.execute(SQL_copy);
+							rs = stmt.executeQuery(SQL_get);
+							while(rs.next())
+							{
+								//uid = rs.getInt("uid");
+								pid = rs.getInt("pid");
+								quantity = rs.getInt("quantity");
+								price = rs.getInt("price");
+								pstmt = conn.prepareStatement(SQL_insert);
+								//pstmt.setInt(1, uid);
+								pstmt.setInt(1, pid);
+								pstmt.setInt(2, quantity);
+								pstmt.setInt(3, price);
+								pstmt.executeUpdate();
+								
+								add = quantity * price;
+								
+								ustmt = conn.prepareStatement(SQL_updateCV);
+								ustmt.setInt(1, add);
+								//ustmt.setInt(2, uid);
+								ustmt.executeUpdate();
+								
+								ustmt = conn.prepareStatement(SQL_updatePV);
+								ustmt.setInt(1, add);
+								//ustmt.setInt(2, uid);
+								ustmt.setInt(2, pid);
+								ustmt.executeUpdate();
+								
+								ustmt = conn.prepareStatement(SQL_updateSV);
+								ustmt.setInt(1, add);
+								//ustmt.setInt(2, uid);
+								ustmt.setInt(2, pid);
+								ustmt.executeUpdate();
+							}
+							
 							stmt.execute(SQL);
 							conn.commit();
 							
