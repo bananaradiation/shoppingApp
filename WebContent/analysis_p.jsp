@@ -40,6 +40,7 @@ try
 
     Statement row = conn.createStatement();
     Statement col = conn.createStatement();
+    Statement grid = conn.createStatement();
     
     String stateList[] = {"all","Alabama","Alaska","Arizona","Arkansas",
             "California","Colorado","Connecticut","Delaware","Florida","Georgia",
@@ -62,29 +63,43 @@ try
         	SQL_row="SELECT name, id, total FROM (SELECT users.name, users.id, SUM(amt) AS total FROM productView, users WHERE productView.uid=users.id AND productView.cid = '"+category+"' GROUP BY users.id, users.name) AS foo ORDER BY total DESC LIMIT 20;";
         }
         else if (!state.equals("all")) {
-        	SQL_row="SELECT users.name, users.id, SUM(amt) FROM customerView, users WHERE customerView.uid=users.id AND users.state='"+state+"' GROUP BY users.name, users.id, amt ORDER BY amt DESC LIMIT 20;";
+        	SQL_row="SELECT users.name, users.id, SUM(amt) as total FROM customerView, users WHERE customerView.uid=users.id AND users.state='"+state+"' GROUP BY users.name, users.id, amt ORDER BY amt DESC LIMIT 20;";
         }
         else {
-        	SQL_row="SELECT users.name, SUM(amt) FROM customerView, users WHERE customerView.uid=users.id GROUP BY users.name, amt ORDER BY amt DESC LIMIT 20;";
+        	SQL_row="SELECT users.name, users.id, SUM(amt) as total FROM customerView, users WHERE customerView.uid=users.id GROUP BY users.name, users.id, amt ORDER BY amt DESC LIMIT 20;";
         }    
     }    
     else {
         if (!state.equals("all") && category !=0) {
-            SQL_row="SELECT state, sum(amt) FROM stateView WHERE cid = '"+category+"' AND state = '"+state+"' GROUP BY cid, state ORDER BY sum(amt) DESC LIMIT 20";
+            SQL_row="SELECT state, sum(amt) as total FROM stateView WHERE cid = '"+category+"' AND state = '"+state+"' GROUP BY cid, state ORDER BY sum(amt) DESC LIMIT 20";
         }
         else if (!state.equals("all")) {
-            SQL_row="SELECT state, sum(amt) FROM stateView WHERE state = '"+state+"' GROUP BY state;";
+            SQL_row="SELECT state, sum(amt) as total FROM stateView WHERE state = '"+state+"' GROUP BY state;";
         }
         else if (category !=0) {
-            SQL_row="SELECT state, sum(amt) FROM stateView WHERE cid = '"+category+"' GROUP BY cid, state ORDER BY sum(amt) DESC LIMIT 20;";
+            SQL_row="SELECT state, sum(amt) as total FROM stateView WHERE cid = '"+category+"' GROUP BY cid, state ORDER BY sum(amt) DESC LIMIT 20;";
         }
         else {
-        	SQL_row="SELECT state, sum(amt) FROM stateView GROUP BY state ORDER BY sum(amt) DESC LIMIT 20;";
+        	SQL_row="SELECT state, sum(amt) as total FROM stateView GROUP BY state ORDER BY sum(amt) DESC LIMIT 20;";
         }
     }
     ResultSet row_rs=row.executeQuery(SQL_row);
     finishTime = System.currentTimeMillis();
     System.out.println("Time for ROW query: " + (finishTime-startTime));
+    ArrayList <String> rowName  = new ArrayList<String>();
+    ArrayList <Integer> rowId  = new ArrayList<Integer>();
+    ArrayList <Integer> rowTotal  = new ArrayList<Integer>();
+    while (row_rs.next()) {
+    	if (option.equals("customers") || option==null) {
+	    	rowName.add(row_rs.getString(1));
+	    	rowId.add(row_rs.getInt(2));
+	    	rowTotal.add(row_rs.getInt(3));
+    	}
+    	else {
+    		rowName.add(row_rs.getString(1));
+    		rowTotal.add(row_rs.getInt(2));
+    	}
+    }  
     
     String SQL_col="";
     startTime = System.currentTimeMillis();
@@ -103,6 +118,15 @@ try
     ResultSet col_rs=col.executeQuery(SQL_col);
     finishTime = System.currentTimeMillis();
     System.out.println("Time for COL query: " + (finishTime-startTime));
+
+    ArrayList <Integer> colId  = new ArrayList<Integer>();
+    ArrayList <String> colName  = new ArrayList<String>();
+    ArrayList <Integer> colTotal  = new ArrayList<Integer>();
+    while (col_rs.next()) {
+        colName.add(col_rs.getString(1));
+        colId.add(col_rs.getInt(2));
+        colTotal.add(col_rs.getInt(3));
+    }
 %>
     <table>
         <form action="analysis_p.jsp" method="POST">
@@ -139,7 +163,6 @@ try
             </select></td>
         </tr>
         <%
-        
         Statement stmtCategory = conn.createStatement();
         ResultSet rsCategory=stmtCategory.executeQuery("SELECT name, id FROM categories");
         ArrayList<String> categoryDropS = new ArrayList<String>();
@@ -151,7 +174,6 @@ try
             categoryDrop.add(rsCategory.getInt("id"));
         }  
         categoryP = categoryDropS.get(category); %>
-        
         <tr>
             <td>Category:</td>
             <td><select name="category">
@@ -172,12 +194,47 @@ try
 <table align="center" width="98%" border="1">
     <tr align="center">
         <%
+    String SQL_grid="";
     if (option.equals("states")) { %>
         <td><strong><font color="#FF0000">STATE</font></strong></td>
-        <% }
+        <% 
+        SQL_grid="select sum(amt) as amt from productView, products, users where productView.pid=products.id and productView.pid=? and productView.uid=users.id and users.state=? group by products.name;";   
+    }
     else if (option.equals("customers")) { %>
         <td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>
-        <% }
+        <% 
+        SQL_grid="select amt from productView, products, users where productView.pid=products.id and productView.pid=? and productView.uid=? group by products.name, productView.amt";
+        }
+    
+    for (int c=0; c<10; c++) { %>
+    	<td align="center"><strong><%= colName.get(c) %> (<%= colTotal.get(c) %>)</strong></td> <%
+    }
+    PreparedStatement pstmt = conn.prepareStatement(SQL_grid);
+    ResultSet grid_rs;
+    for (int r=0; r<20; r++) {
+    	grid_rs = null;
+    	if (!option.equals("states")) {
+    		pstmt.setInt(2,rowId.get(r));
+    	}
+    	else {
+    	    pstmt.setString(2,rowName.get(r));
+    	} %>
+    	
+    	<tr><td align="center"><strong><%=rowName.get(r) %> (<%=rowTotal.get(r) %>)</strong></td>
+    	<%
+    	for (int g=0; g<10; g++) {
+    		pstmt.setInt(1, colId.get(g));
+    		grid_rs = pstmt.executeQuery();
+    		if (grid_rs.next()) { %>
+    	   	<td align="center"><%=grid_rs.getInt("amt") %></td>
+    	<%
+    		}
+    		else {%>
+            <td align="center">0</td>
+            <%
+    		}
+    	}
+    }
 
 finishTime = System.currentTimeMillis();
 System.out.println("Time for GRID query: " + (finishTime-startTime)); %>

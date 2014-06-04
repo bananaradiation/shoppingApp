@@ -8,6 +8,7 @@ INSERT INTO customerView(UID, STATE, AMT)
 FROM sales JOIN users ON SERIALes.uid=users.id
 GROUP BY sales.uid, users.state);
 
+create index stateidx on customerView(state);
 
 CREATE TABLE productView (
 	id 		SERIAL PRIMARY KEY,
@@ -22,7 +23,9 @@ FROM sales, products, categories
 WHERE sales.pid=products.id AND products.cid=categories.id
 GROUP BY sales.pid, sales.uid, products.cid
 );
-
+create index pididx on productView(pid);
+create index uid on productView(uid);
+create index cid on productView(cid);
 
 CREATE TABLE stateView(
 	id		SERIAL PRIMARY KEY,
@@ -36,6 +39,26 @@ FROM users, sales, products
 WHERE users.id=sales.uid AND products.id=sales.pid
 GROUP BY products.cid, users.state
 );
+create index cididx on stateView(cid);
+
+
+-- grid (filters already done on row/cols)
+-- customer
+select amt
+from productView, products, users 
+where productView.pid=products.id 
+and productView.pid=? 
+and productView.uid=? 
+group by products.name, amt
+
+-- state
+select products.name, amt
+from productView, products, users 
+where productView.pid=products.id 
+and productView.pid=? 
+and productView.uid=users.id 
+and users.state=? 
+group by products.name, amt
 
 
 -- product col, no filter
@@ -70,7 +93,7 @@ LIMIT 10;
 SELECT name, prod.id, total
 FROM (SELECT products.name, products.id, SUM(amt) AS total
 FROM productView, products, users
-WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '1' AND users.state='Alaska'
+WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '"+category+"' AND users.state='"+state+"'
 GROUP BY products.id, products.name) AS prod
 ORDER BY total DESC
 LIMIT 10;
