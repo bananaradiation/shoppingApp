@@ -47,6 +47,17 @@ GROUP BY products.cid, users.state
 );
 create index cididx on stateView(cid);
 
+-- super fast no filter column header generatation
+drop table topP; 
+create table topP as 
+(SELECT prod.name, prod.id, prod.total 
+FROM 
+(SELECT name, products.id, sum(amt) AS total 
+FROM productView, products 
+WHERE productView.pid=products.id 
+GROUP BY products.id, products.name) AS prod 
+ORDER BY total DESC LIMIT 10);	
+
 
 -- grid (filters already done on row/cols)
 -- customer
