@@ -158,15 +158,14 @@ if(session.getAttribute("name")!=null)
 							stmt.execute(SQL);
 							conn.commit();
 							
-							conn.setAutoCommit(false);
-							out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
-							out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");
 							String sql_top_update="drop table topP; create table topP as ( SELECT prod.name, prod.id, prod.total FROM (SELECT name, products.id, sum(amt) AS total FROM productView, products WHERE productView.pid=products.id GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10);";
-							Statement stmt_top = conn.createStatement();
-							stmt_top.execute(sql_top_update);
-							conn.commit();
+                            Statement stmt_top = conn.createStatement();
+                            stmt_top.execute(sql_top_update);
+                            conn.commit();
 							
 							conn.setAutoCommit(true);
+							out.println("Dear customer '"+uName+"', Thanks for your purchasing.<br> Your card '"+card+"' has been successfully proved. <br>We will ship the products soon.");
+							out.println("<br><font size=\"+2\" color=\"#990033\"> <a href=\"products_browsing.jsp\" target=\"_self\">Continue purchasing</a></font>");
 					}
 					catch(Exception e)
 					{
