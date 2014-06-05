@@ -102,20 +102,26 @@ try
     }  
     
     String SQL_col="";
+    ResultSet col_rs=null;
     startTime = System.currentTimeMillis();
     if (!state.equals("all") && category != 0) {
         SQL_col="SELECT name, prod.id, total FROM (SELECT products.name, products.id, SUM(amt) AS total FROM productView, products, users WHERE productView.pid=products.id AND productView.uid=users.id AND productView.cid = '"+category+"' AND users.state='"+state+"' GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
-    }
+        col_rs=col.executeQuery(SQL_col);
+        }
     else if (category != 0) {
         SQL_col="SELECT prod.name, prod.id, prod.total FROM (SELECT products.name, products.id, SUM(amt) AS total FROM productView, products WHERE productView.pid=products.id AND productView.cid = '"+category+"' GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
-    }
+        col_rs=col.executeQuery(SQL_col);
+        }
     else if (!state.equals("all")) {
-        SQL_col="SELECT prod.name, prod.id, prod.total FROM (SELECT products.name, products.id, SUM(amt) AS total FROM productView, products, users WHERE productView.pid=products.id AND productView.uid=users.id AND users.state='"+state+"' GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
+        SQL_col="SELECT prod.name, prod.id, prod.total FROM (SELECT products.name, products.id, SUM(productView.amt) AS total FROM productView, products, customerView WHERE productView.pid=products.id AND productView.uid=customerView.uid AND customerView.state='"+state+"' GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
+        col_rs=col.executeQuery(SQL_col);
     }
     else {
-        SQL_col="SELECT prod.name, prod.id, prod.total FROM (SELECT name, products.id, sum(amt) AS total FROM productView, products WHERE productView.pid=products.id GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
+//     	SQL_col="select prod.pid, prod.total from (select name, pid, sum(amt) as total from productView group by pid) as prod order by total desc limit 10;";
+//         SQL_col="SELECT prod.name, prod.id, prod.total FROM (SELECT name, products.id, sum(amt) AS total FROM productView, products WHERE productView.pid=products.id GROUP BY products.id, products.name) AS prod ORDER BY total DESC LIMIT 10;";
+        String SQL_cheat=" SELECT name, id, total from topP;";
+        col_rs=col.executeQuery(SQL_cheat);
     }
-    ResultSet col_rs=col.executeQuery(SQL_col);
     finishTime = System.currentTimeMillis();
     System.out.println("Time for COL query: " + (finishTime-startTime));
 
@@ -195,17 +201,18 @@ try
     <tr align="center">
         <%
     String SQL_grid="";
-    if (option.equals("states")) { %>
+    if (!option.equals("customers")) { %>
         <td><strong><font color="#FF0000">STATE</font></strong></td>
         <% 
         SQL_grid="select sum(amt) as amt from productView, products, users where productView.pid=products.id and productView.pid=? and productView.uid=users.id and users.state=? group by products.name;";   
+    
     }
-    else if (option.equals("customers")) { %>
+    else { %>
         <td><strong><font color="#FF0000">CUSTOMERS</font></strong></td>
         <% 
         SQL_grid="select amt from productView, products, users where productView.pid=products.id and productView.pid=? and productView.uid=? group by products.name, productView.amt";
-        }
-    
+        
+    }
     for (int c=0; c<10; c++) { %>
     	<td align="center"><strong><%= colName.get(c) %> (<%= colTotal.get(c) %>)</strong></td> <%
     }
@@ -218,7 +225,8 @@ try
     	}
     	else {
     	    pstmt.setString(2,rowName.get(r));
-    	} %>
+    	} 
+    	%>
     	
     	<tr><td align="center"><strong><%=rowName.get(r) %> (<%=rowTotal.get(r) %>)</strong></td>
     	<%

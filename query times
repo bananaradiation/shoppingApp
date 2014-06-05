@@ -1,7 +1,11 @@
+experiments:
+populating grid with 200 queries is faster than creating 20 temp tables for row and running 10 product queries on each table
+(56ms vs 2570ms)
+
 customer, no filter
-Time for ROW query: 618
-Time for COL query: 4830
-Time for GRID query: 6300
+Time for ROW query: 21
+Time for COL query: 1
+Time for GRID query: 1048
 
 customer, state filter
 Time for ROW query: 7
@@ -19,9 +23,9 @@ Time for COL query: 138
 Time for GRID query: 1270
 
 state, no filter
-Time for ROW query: 3
-Time for COL query: 4702
-Time for GRID query: 5754
+Time for ROW query: 2
+Time for COL query: 2
+Time for GRID query: 1008
 
 state, state filter
 Time for ROW query: 14
