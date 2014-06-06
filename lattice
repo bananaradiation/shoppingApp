@@ -1,7 +1,9 @@
-sales(uid, pid, quantity, price) ---> productView(pid, uid, cid, amt)
+Properly viewable in eclipse
+
+sales(uid, pid, quantity, price) ---> productView(pid, uid, cid, amt) ---> topP(name, id, total)
        |										|
        |										|
-       |join users on users.id=productView.uid	|
+       |join users on users.id=sales.uid	|
        |										|
        V										|
 customerView(uid, state, amt)					|join users on users.id=productView.uid
